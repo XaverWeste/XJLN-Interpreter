@@ -27,6 +27,24 @@ public class Tokenhandler {
     public Token next(){
         if(index + 1 < tokens.size()) throw new RuntimeException("Expected Token, got nothing");
         index++;
+        return tokens.get(index + 1);
+    }
+
+    public Token current(){
+        return tokens.get(index);
+    }
+
+    public Token last(){
+        if(index == 0) return tokens.get(0);
         return tokens.get(index - 1);
+    }
+
+    public static void assertToken(Token token, String s){
+        if(!token.s().equals(s)) throw new RuntimeException("Expected " + s + " got " + token.s());
+    }
+
+    public static Token assertToken(Token token, Token.Type t){
+        if(token.t() != t) throw new RuntimeException("Expected " + t.toString() + " got " + token.t().toString());
+        return token;
     }
 }

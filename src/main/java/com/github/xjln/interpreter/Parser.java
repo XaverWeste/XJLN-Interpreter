@@ -11,6 +11,10 @@ public class Parser {
         scanner = new Scanner();
     }
 
+    public AST createAST(Tokenhandler th){
+        return null;
+    }
+
     public String parseFile(File file) throws FileNotFoundException {
         StringBuilder sb = new StringBuilder();
 
