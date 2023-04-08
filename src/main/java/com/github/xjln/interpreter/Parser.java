@@ -2,12 +2,10 @@ package com.github.xjln.interpreter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Set;
 
 public class Parser {
 
     public final Scanner scanner;
-    private Tokenhandler th;
 
     public Parser(){
         scanner = new Scanner();
