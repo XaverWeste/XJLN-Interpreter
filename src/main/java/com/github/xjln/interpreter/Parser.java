@@ -12,7 +12,10 @@ public class Parser {
     }
 
     public AST createAST(Tokenhandler th){
-        return null;
+        AST.Operation ast = new AST.Operation();
+        ast.token = th.current();
+
+        return ast;
     }
 
     public String parseFile(File file) throws FileNotFoundException {
@@ -43,6 +46,8 @@ public class Parser {
             }
             if(i > 0) sb.append(line).append("\n");
         }
+
+        if(i > 0) throw new RuntimeException("Method was not closed");
 
         return sb.toString();
     }

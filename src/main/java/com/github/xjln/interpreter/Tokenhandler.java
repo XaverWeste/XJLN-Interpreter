@@ -39,6 +39,10 @@ public class Tokenhandler {
         return tokens.get(index - 1);
     }
 
+    public boolean hasNext(){
+        return index + 1 < tokens.size();
+    }
+
     public static void assertToken(Token token, String s){
         if(!token.s().equals(s)) throw new RuntimeException("Expected " + s + " got " + token.s());
     }

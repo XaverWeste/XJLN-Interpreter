@@ -6,22 +6,25 @@ public class Variable{
     private final String type;
     private String value;
 
-    public Variable(String value,String type,boolean constant){
+    public Variable(String type,String value,boolean constant){
         this.constant=constant;
         this.type=type;
         this.value=value;
+        check();
     }
 
     public Variable(String type){
         this.constant=false;
         this.type=type;
         this.value="";
+        check();
     }
 
     public Variable(){
         this.constant=false;
         this.type="";
         this.value="";
+        check();
     }
 
     public void set(Variable var){
@@ -48,12 +51,14 @@ public class Variable{
         return constant;
     }
 
+    private void check(){
+        if(!type.equals("") && !getType(value).equals(type)) throw new RuntimeException("illegal argument");
+    }
+
     public static String getType(String value){
         if(value.startsWith("\"")&&value.endsWith("\"")) return "str";
         if(value.matches("^[0-9.]+$")) return "num";
         if(value.equals("true")||value.equals("false")) return "bool";
-        if(value.startsWith("§")) return "class";
-        if(value.startsWith("{")&&value.endsWith("}")) return "arr";
         return null;
     }
 }

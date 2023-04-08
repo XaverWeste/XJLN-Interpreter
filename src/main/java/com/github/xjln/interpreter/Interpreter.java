@@ -5,8 +5,6 @@ import com.github.xjln.system.System;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Interpreter {
 
@@ -28,6 +26,8 @@ public class Interpreter {
                 }
             }
         }catch (FileNotFoundException ignored){} //won't throw
+
+        java.lang.System.out.println("XJLN Process finished successfully");
     }
 
     private void execute(String line){
@@ -42,14 +42,19 @@ public class Interpreter {
 
     private void executeVarAssigment(Tokenhandler th){
         if(th.current().t() == Token.Type.IDENTIFIER){
-            Variable v = getVar(th.current().s());
+            String type = th.last().s();
+            String name = th.current().s();
 
+            Variable v = getVar(name);
             if(v != null) throw new RuntimeException("illegal argument");
+
+            if(!th.hasNext()) throw new RuntimeException("expected value");
             th.assertToken("=");
 
-
-
+            v = new Variable(type, parser.createAST(th).execute(this).s(), type.equals("const"));
+            System.mem.set(name, v);
         }else{
+            if(!th.hasNext()) throw new RuntimeException("expected value");
             th.assertToken("=");
             Variable v = getVar(th.last().s());
 
