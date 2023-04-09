@@ -1,3 +1,4 @@
 main
-    x = 10 + 10
+    num x = 10
+    x = 5
 end

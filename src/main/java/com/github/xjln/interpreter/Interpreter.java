@@ -43,7 +43,7 @@ public class Interpreter {
     private void executeVarAssigment(Tokenhandler th){
         if(th.current().t() == Token.Type.IDENTIFIER){
             String type = th.last().s();
-            String name = th.current().s();
+            String name = th.next().s();
 
             Variable v = getVar(name);
             if(v != null) throw new RuntimeException("illegal argument");
