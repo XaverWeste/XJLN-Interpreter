@@ -13,7 +13,20 @@ public class Parser {
 
     public AST createAST(Tokenhandler th){
         AST.Operation ast = new AST.Operation();
-        ast.token = th.current();
+        ast.token = th.next();
+
+        Token op;
+
+        while(th.hasNext()){
+            op = th.assertToken(Token.Type.OPERATOR);
+            if(!th.hasNext()) throw new RuntimeException("illegal argument");
+            AST.Operation last = ast;
+            ast = new AST.Operation();
+            ast.left = last;
+            ast.token = op;
+            ast.right = new AST.Operation();
+            ast.right.token = th.next();
+        }
 
         return ast;
     }

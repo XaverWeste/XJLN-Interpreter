@@ -74,6 +74,45 @@ public class Interpreter {
 
     public Token executeOperation(Token left, Token operator, Token right){
         Tokenhandler.assertToken(operator, Token.Type.OPERATOR);
+        switch(left.t()){
+            case NUMBER -> {
+                Tokenhandler.assertToken(right, Token.Type.NUMBER);
+                double first = Double.parseDouble(left.s());
+                double second = Double.parseDouble(right.s());
+                switch (operator.s()){
+                    case "+" -> { return new Token(String.valueOf(first + second), Token.Type.NUMBER); }
+                    case "-" -> { return new Token(String.valueOf(first - second), Token.Type.NUMBER); }
+                    case "*" -> { return new Token(String.valueOf(first * second), Token.Type.NUMBER); }
+                    case "/" -> { return new Token(String.valueOf(first / second), Token.Type.NUMBER); }
+                    case "%" -> { return new Token(String.valueOf(first % second), Token.Type.NUMBER); }
+                    case "==" -> { return new Token(String.valueOf(first == second), Token.Type.BOOL); }
+                    case "!=" -> { return new Token(String.valueOf(first != second), Token.Type.BOOL); }
+                }
+            }
+            case BOOL -> {
+                Tokenhandler.assertToken(right, Token.Type.BOOL);
+                boolean first = Boolean.parseBoolean(left.s());
+                boolean second = Boolean.parseBoolean(right.s());
+                switch (operator.s()){
+                    case "==" -> { return new Token(String.valueOf(first == second), Token.Type.BOOL); }
+                    case "!=" -> { return new Token(String.valueOf(first != second), Token.Type.BOOL); }
+                    case "&" -> { return new Token(String.valueOf(first && second), Token.Type.BOOL); }
+                    case "|" -> { return new Token(String.valueOf(first || second), Token.Type.BOOL); }
+                }
+            }
+            case STRING -> {
+                if(operator.s().equals("+")){
+                    if(right.t() == Token.Type.STRING) return new Token(left.s().substring(1, left.s().length() - 1) + right.s().substring(1, right.s().length() - 1), Token.Type.STRING);
+                    else return new Token(left.s().substring(1, left.s().toCharArray().length) + right.s(), Token.Type.STRING);
+                }
+                else{
+                    switch (operator.s()){
+                        case "==" -> { return new Token(String.valueOf(left.s().equals(right.s())), Token.Type.BOOL); }
+                        case "!=" -> { return new Token(String.valueOf(!left.s().equals(right.s())), Token.Type.BOOL); }
+                    }
+                }
+            }
+        }
         throw new RuntimeException("no definition for " + operator.s() + " with " + left.t().toString() + " and " + right.t().toString());
     }
 }
