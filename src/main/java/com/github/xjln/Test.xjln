@@ -1,0 +1,4 @@
+main
+    num x = 10
+    x = 5
+end

@@ -54,7 +54,7 @@ public class Scanner {
                 value=new StringBuilder();
                 value.append(chars[i]);
 
-                while(isOperator(chars[i+1])){
+                while(i + 1 < chars.length && isOperator(chars[i+1])){
                     i++;
                     value.append(chars[i]);
                 }

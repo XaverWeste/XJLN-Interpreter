@@ -2,15 +2,33 @@ package com.github.xjln.interpreter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Set;
 
 public class Parser {
 
     public final Scanner scanner;
-    private Tokenhandler th;
 
     public Parser(){
         scanner = new Scanner();
+    }
+
+    public AST createAST(Tokenhandler th){
+        AST.Operation ast = new AST.Operation();
+        ast.token = th.next();
+
+        Token op;
+
+        while(th.hasNext()){
+            op = th.assertToken(Token.Type.OPERATOR);
+            if(!th.hasNext()) throw new RuntimeException("illegal argument");
+            AST.Operation last = ast;
+            ast = new AST.Operation();
+            ast.left = last;
+            ast.token = op;
+            ast.right = new AST.Operation();
+            ast.right.token = th.next();
+        }
+
+        return ast;
     }
 
     public String parseFile(File file) throws FileNotFoundException {
@@ -41,6 +59,8 @@ public class Parser {
             }
             if(i > 0) sb.append(line).append("\n");
         }
+
+        if(i > 0) throw new RuntimeException("Method was not closed");
 
         return sb.toString();
     }
