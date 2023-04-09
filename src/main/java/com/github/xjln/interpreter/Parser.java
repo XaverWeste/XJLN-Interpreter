@@ -1,5 +1,7 @@
 package com.github.xjln.interpreter;
 
+import com.github.xjln.lang.ParameterList;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -40,10 +42,23 @@ public class Parser {
         while(sc.hasNextLine()){
             line = sc.nextLine().trim();
             if(line.equals("main")) sb.append(getContent(sc));
+            else if(line.startsWith("def")) parseMethodDef(sc, line);
             else throw new RuntimeException("illegal argument in \"" + line +"\"");
         }
 
         return sb.toString();
+    }
+
+    private void parseMethodDef(java.util.Scanner sc, String current){
+        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
+        th.assertToken("def");
+        String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        th.assertToken("(");
+        ParameterList pl = new ParameterList();
+        Token t = th.next();
+        while(!t.s().equals(")")){
+            //TODO
+        }
     }
 
     private String getContent(java.util.Scanner sc){
