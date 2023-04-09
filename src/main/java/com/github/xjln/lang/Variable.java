@@ -1,5 +1,7 @@
 package com.github.xjln.lang;
 
+import java.util.Objects;
+
 public class Variable{
 
     private final boolean constant;
@@ -37,6 +39,12 @@ public class Variable{
         if(!constant&&(type.equals("")|| type.equals(ty))){
             value=val;
         }
+    }
+
+    public boolean canSet(String val){
+        if(constant) return false;
+        if(type.equals("")) return true;
+        return getType(val).equals(type);
     }
 
     public String value(){
