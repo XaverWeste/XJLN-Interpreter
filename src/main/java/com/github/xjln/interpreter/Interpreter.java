@@ -8,7 +8,6 @@ import com.github.xjln.system.System;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Set;
 
 public class Interpreter {
 
@@ -39,7 +38,7 @@ public class Interpreter {
     private void execute(String line, Memory mem){
         line = line.trim();
         if(!(line.equals("") || line.startsWith("#"))){
-            Tokenhandler th = new Tokenhandler(parser.scanner.getTokens(line));
+            TokenHandler th = new TokenHandler(parser.scanner.getTokens(line));
             th.assertToken(Token.Type.IDENTIFIER);
 
             if(th.next().s().equals("(")) executeMethod(th, mem);
@@ -47,7 +46,7 @@ public class Interpreter {
         }
     }
 
-    private void executeVarAssigment(Tokenhandler th, Memory mem){
+    private void executeVarAssigment(TokenHandler th, Memory mem){
         th.back();
         if(th.current().t() == Token.Type.IDENTIFIER){
             String type = th.last().s();
@@ -76,7 +75,7 @@ public class Interpreter {
         }
     }
 
-    private void executeMethod(Tokenhandler th, Memory mem){
+    private void executeMethod(TokenHandler th, Memory mem){
         th.back();
         Method m = System.mem.getM(th.last().s());
         if(m == null) throw new RuntimeException("method didn't exist");
@@ -88,7 +87,7 @@ public class Interpreter {
         for(String l:m.code.split("\n")) execute(l, memory);
     }
 
-    private String[] getParas(Tokenhandler th){
+    private String[] getParas(TokenHandler th){
         ArrayList<String> values = new ArrayList<>();
         th.next();
         Token t = th.current();
@@ -112,10 +111,10 @@ public class Interpreter {
     }
 
     public Token executeOperation(Token left, Token operator, Token right){
-        Tokenhandler.assertToken(operator, Token.Type.OPERATOR);
+        TokenHandler.assertToken(operator, Token.Type.OPERATOR);
         switch(left.t()){
             case NUMBER -> {
-                Tokenhandler.assertToken(right, Token.Type.NUMBER);
+                TokenHandler.assertToken(right, Token.Type.NUMBER);
                 double first = Double.parseDouble(left.s());
                 double second = Double.parseDouble(right.s());
                 switch (operator.s()){
@@ -129,7 +128,7 @@ public class Interpreter {
                 }
             }
             case BOOL -> {
-                Tokenhandler.assertToken(right, Token.Type.BOOL);
+                TokenHandler.assertToken(right, Token.Type.BOOL);
                 boolean first = Boolean.parseBoolean(left.s());
                 boolean second = Boolean.parseBoolean(right.s());
                 switch (operator.s()){

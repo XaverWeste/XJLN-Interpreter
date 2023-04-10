@@ -3,6 +3,7 @@ package com.github.xjln.interpreter;
 import com.github.xjln.lang.Method;
 import com.github.xjln.lang.ParameterList;
 import com.github.xjln.lang.Variable;
+import com.github.xjln.system.Memory;
 import com.github.xjln.system.System;
 
 import java.io.File;
@@ -17,7 +18,7 @@ public class Parser {
         scanner = new Scanner();
     }
 
-    public AST createAST(Tokenhandler th){
+    public AST createAST(TokenHandler th){
         AST.Operation ast = new AST.Operation();
         ast.token = th.next();
 
@@ -54,7 +55,7 @@ public class Parser {
     }
 
     private void parseMethodDef(java.util.Scanner sc, String current){
-        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
+        TokenHandler th = new TokenHandler(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");

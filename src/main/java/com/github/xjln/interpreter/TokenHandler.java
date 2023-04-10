@@ -2,12 +2,12 @@ package com.github.xjln.interpreter;
 
 import java.util.List;
 
-public class Tokenhandler {
+public class TokenHandler {
 
     private final List<Token> tokens;
     private int index = 0;
 
-    public Tokenhandler(List<Token> tokens){
+    public TokenHandler(List<Token> tokens){
         this.tokens = tokens;
     }
 
@@ -25,7 +25,7 @@ public class Tokenhandler {
     }
 
     public Token next(){
-        if(index + 1 > tokens.size()) throw new RuntimeException("Expected Token, got nothing");
+        if(index > tokens.size()) throw new RuntimeException("Expected Token, got nothing");
         index++;
         return tokens.get(index - 1);
     }
