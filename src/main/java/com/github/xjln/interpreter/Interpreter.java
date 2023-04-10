@@ -8,6 +8,7 @@ import com.github.xjln.system.System;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Interpreter {
 
@@ -58,8 +59,8 @@ public class Interpreter {
             if(!th.hasNext()) throw new RuntimeException("expected value");
             th.assertToken("=");
 
-            v = new Variable(type, parser.createAST(th).execute(this).s(), type.equals("const"));
-            System.mem.set(name, v);
+            v = new Variable(type, executeStatement(th, mem).s(), type.equals("const"));
+            setVar(name, v, mem);
         }else{
             if(!th.hasNext()) throw new RuntimeException("expected value");
             th.assertToken("=");
@@ -67,12 +68,39 @@ public class Interpreter {
 
             if(v == null){
                 v = new Variable();
-                System.mem.set(th.last().s(), v);
+                setVar(th.last().s(), v, mem);
             }
 
-            Token value = parser.createAST(th).execute(this);
+            Token value = executeStatement(th, mem);
             v.set(value.s(), Variable.getType(value.s()));
         }
+    }
+
+    private Token executeStatement(TokenHandler th, Memory mem){
+        List<Token> tokens = new ArrayList<>();
+        Token current;
+
+        while (th.hasNext()){
+            if((current = th.next()).t() == Token.Type.IDENTIFIER){
+                if(th.hasNext()) {
+                    if (th.next().s().equals("(")) {
+                        executeMethod(th, mem);
+                        tokens.add(System.mem.get("result").toToken());
+                    } else {
+                        th.back();
+                        Variable var = getVar(current.s(), mem);
+                        if (var == null) throw new RuntimeException("Variable " + current.s() + " does not exist");
+                        tokens.add(var.toToken());
+                    }
+                }else{
+                    Variable var = getVar(current.s(), mem);
+                    if (var == null) throw new RuntimeException("Variable " + current.s() + " does not exist");
+                    tokens.add(var.toToken());
+                }
+            }else tokens.add(current);
+        }
+
+        return parser.createAST(new TokenHandler(tokens)).execute(this);
     }
 
     private void executeMethod(TokenHandler th, Memory mem){
@@ -102,12 +130,20 @@ public class Interpreter {
             t = th.next();
         }
 
+        th.next();
+
         return values.toArray(new String[0]);
     }
 
     private Variable getVar(String name, Memory mem){
         if(mem != null && mem.exist(name)) return mem.get(name);
         return System.mem.get(name);
+    }
+
+    private void setVar(String name, Variable var, Memory mem){
+        if(mem != null && (mem.exist(name) || !System.mem.exist(name))){
+            mem.set(name, var);
+        }else System.mem.set(name, var);
     }
 
     public Token executeOperation(Token left, Token operator, Token right){

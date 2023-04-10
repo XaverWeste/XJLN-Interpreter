@@ -2,7 +2,7 @@ package com.github.xjln.interpreter;
 
 public record Token(String s, Type t){
 
-    enum Type{SIMPLE,IDENTIFIER,NUMBER,STRING,OPERATOR,BOOL}
+    public enum Type{SIMPLE,IDENTIFIER,NUMBER,STRING,OPERATOR,BOOL}
 
     @Override
     public boolean equals(Object obj) {

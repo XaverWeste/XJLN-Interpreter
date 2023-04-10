@@ -1,5 +1,7 @@
 package com.github.xjln.lang;
 
+import com.github.xjln.interpreter.Token;
+
 import java.util.Objects;
 
 public class Variable{
@@ -57,6 +59,14 @@ public class Variable{
 
     public boolean constant(){
         return constant;
+    }
+
+    public Token toToken(){
+        return new Token(value, switch (type){
+            case "str" -> Token.Type.STRING;
+            case "num" -> Token.Type.NUMBER;
+            default -> Token.Type.IDENTIFIER;
+        });
     }
 
     private void check(){

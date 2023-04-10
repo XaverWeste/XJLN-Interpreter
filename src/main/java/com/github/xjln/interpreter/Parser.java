@@ -3,7 +3,6 @@ package com.github.xjln.interpreter;
 import com.github.xjln.lang.Method;
 import com.github.xjln.lang.ParameterList;
 import com.github.xjln.lang.Variable;
-import com.github.xjln.system.Memory;
 import com.github.xjln.system.System;
 
 import java.io.File;

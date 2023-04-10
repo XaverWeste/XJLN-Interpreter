@@ -25,7 +25,7 @@ public class TokenHandler {
     }
 
     public Token next(){
-        if(index > tokens.size()) throw new RuntimeException("Expected Token, got nothing");
+        if(index >= tokens.size()) throw new RuntimeException("Expected Token, got nothing");
         index++;
         return tokens.get(index - 1);
     }
