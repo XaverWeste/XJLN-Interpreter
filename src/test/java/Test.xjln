@@ -1,0 +1,7 @@
+main
+    test(10)
+end
+
+def test(num x)
+
+end

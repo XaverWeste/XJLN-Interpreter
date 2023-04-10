@@ -1,5 +1,7 @@
 package com.github.xjln.lang;
 
+import java.util.Objects;
+
 public class Variable{
 
     private final boolean constant;
@@ -39,6 +41,12 @@ public class Variable{
         }
     }
 
+    public boolean canSet(String val){
+        if(constant) return false;
+        if(type.equals("")) return true;
+        return getType(val).equals(type);
+    }
+
     public String value(){
         return value;
     }
@@ -52,13 +60,14 @@ public class Variable{
     }
 
     private void check(){
-        if(!type.equals("") && !getType(value).equals(type)) throw new RuntimeException("illegal argument");
+        if(!type.equals("") && !value.equals("") && !getType(value).equals(type)) throw new RuntimeException("illegal argument");
     }
 
     public static String getType(String value){
         if(value.startsWith("\"")&&value.endsWith("\"")) return "str";
         if(value.matches("^[0-9.]+$")) return "num";
         if(value.equals("true")||value.equals("false")) return "bool";
-        return null;
+        if(value.equals("")) return "";
+        throw new RuntimeException("illegal argument");
     }
 }
