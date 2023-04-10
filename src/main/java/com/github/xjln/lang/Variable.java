@@ -60,13 +60,14 @@ public class Variable{
     }
 
     private void check(){
-        if(!type.equals("") && !getType(value).equals(type)) throw new RuntimeException("illegal argument");
+        if(!type.equals("") && !value.equals("") && !getType(value).equals(type)) throw new RuntimeException("illegal argument");
     }
 
     public static String getType(String value){
         if(value.startsWith("\"")&&value.endsWith("\"")) return "str";
         if(value.matches("^[0-9.]+$")) return "num";
         if(value.equals("true")||value.equals("false")) return "bool";
-        return null;
+        if(value.equals("")) return "";
+        throw new RuntimeException("illegal argument");
     }
 }

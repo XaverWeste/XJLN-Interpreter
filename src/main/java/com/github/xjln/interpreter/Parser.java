@@ -47,7 +47,7 @@ public class Parser {
             line = sc.nextLine().trim();
             if(line.equals("main")) sb.append(getContent(sc));
             else if(line.startsWith("def")) parseMethodDef(sc, line);
-            else throw new RuntimeException("illegal argument in \"" + line +"\"");
+            else if(!line.equals("")) throw new RuntimeException("illegal argument in \"" + line +"\"");
         }
 
         return sb.toString();
