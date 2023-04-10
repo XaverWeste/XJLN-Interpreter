@@ -15,6 +15,7 @@ public class ParameterList {
     }
 
     public void addParameter(String name, Variable para){
+        for(Parameter p:parameters) if(p.name.equals(name)) throw new RuntimeException("variable " + name + " already exist in method definition");
         parameters.add(new Parameter(name, para));
     }
 
