@@ -42,10 +42,6 @@ public sealed class Memory permits Memory.SystemMemory{
         else vars.put(name,var);
     }
 
-    public int getVarSize(){
-        return vars.keySet().size();
-    }
-
     public boolean exist(String name){
         return vars.containsKey(name);
     }

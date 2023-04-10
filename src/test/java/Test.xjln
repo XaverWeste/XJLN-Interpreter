@@ -1,6 +1,6 @@
 main
     num x = 10
-    test = x + 10
+    test = x + test(10)
 end
 
 def test(num x)

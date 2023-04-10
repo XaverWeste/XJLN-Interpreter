@@ -64,12 +64,15 @@ public class Interpreter {
         }else{
             if(!th.hasNext()) throw new RuntimeException("expected value");
             th.assertToken("=");
+            th.back();
             Variable v = getVar(th.last().s(), mem);
 
             if(v == null){
                 v = new Variable();
                 setVar(th.last().s(), v, mem);
             }
+
+            th.next();
 
             Token value = executeStatement(th, mem);
             v.set(value.s(), Variable.getType(value.s()));

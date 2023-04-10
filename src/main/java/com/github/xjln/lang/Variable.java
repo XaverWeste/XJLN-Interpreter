@@ -2,8 +2,6 @@ package com.github.xjln.lang;
 
 import com.github.xjln.interpreter.Token;
 
-import java.util.Objects;
-
 public class Variable{
 
     private final boolean constant;
@@ -62,7 +60,7 @@ public class Variable{
     }
 
     public Token toToken(){
-        return new Token(value, switch (type){
+        return new Token(value, switch (getType(value)){
             case "str" -> Token.Type.STRING;
             case "num" -> Token.Type.NUMBER;
             default -> Token.Type.IDENTIFIER;
