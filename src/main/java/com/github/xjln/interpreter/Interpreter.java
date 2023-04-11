@@ -1,6 +1,8 @@
 package com.github.xjln.interpreter;
 
+import com.github.xjln.lang.Class;
 import com.github.xjln.lang.Method;
+import com.github.xjln.lang.Object;
 import com.github.xjln.lang.Variable;
 import com.github.xjln.system.Memory;
 import com.github.xjln.system.System;
@@ -24,7 +26,7 @@ public class Interpreter {
         try{
             for(String line:parser.parseFile(file).split("\n")){
                 try{
-                    execute(line, null);
+                    execute(line, null, null);
                 }catch (RuntimeException e){
                     RuntimeException exception = new RuntimeException(e.getMessage() + ", in: " + line);
                     exception.setStackTrace(e.getStackTrace());
@@ -36,50 +38,51 @@ public class Interpreter {
         java.lang.System.out.println("\nXJLN Process finished successfully\n");
     }
 
-    private void execute(String line, Memory mem){
+    private void execute(String line, Object o, Memory mem){
         line = line.trim();
         if(!(line.equals("") || line.startsWith("#"))){
             TokenHandler th = new TokenHandler(parser.scanner.getTokens(line));
             th.assertToken(Token.Type.IDENTIFIER);
 
-            if(th.next().s().equals("(")) executeMethod(th, mem);
-            else executeVarAssigment(th, mem);
+            if(th.current().s().equals("(")) executeMethod(th, o, mem);
+            else if(th.current().s().equals("[")) executeClass(th, mem);
+            else executeVarAssigment(th, o, mem);
         }
     }
 
-    private void executeVarAssigment(TokenHandler th, Memory mem){
+    private void executeVarAssigment(TokenHandler th, Object o, Memory mem){
         th.back();
         if(th.current().t() == Token.Type.IDENTIFIER){
             String type = th.last().s();
             String name = th.next().s();
 
-            Variable v = getVar(name, mem);
+            Variable v = getVar(name, o, mem);
             if(v != null) throw new RuntimeException("illegal argument");
 
             if(!th.hasNext()) throw new RuntimeException("expected value");
             th.assertToken("=");
 
-            v = new Variable(type, executeStatement(th, mem).s(), type.equals("const"));
-            setVar(name, v, mem);
+            v = new Variable(type, executeStatement(th, o, mem).s(), type.equals("const"));
+            setVar(name, v, o, mem);
         }else{
             if(!th.hasNext()) throw new RuntimeException("expected value");
             th.assertToken("=");
             th.back();
-            Variable v = getVar(th.last().s(), mem);
+            Variable v = getVar(th.last().s(), o, mem);
 
             if(v == null){
                 v = new Variable();
-                setVar(th.last().s(), v, mem);
+                setVar(th.last().s(), v, o, mem);
             }
 
             th.next();
 
-            Token value = executeStatement(th, mem);
+            Token value = executeStatement(th, o, mem);
             v.set(value.s(), Variable.getType(value.s()));
         }
     }
 
-    private Token executeStatement(TokenHandler th, Memory mem){
+    private Token executeStatement(TokenHandler th, Object o, Memory mem){
         List<Token> tokens = new ArrayList<>();
         Token current;
 
@@ -87,16 +90,18 @@ public class Interpreter {
             if((current = th.next()).t() == Token.Type.IDENTIFIER){
                 if(th.hasNext()) {
                     if (th.next().s().equals("(")) {
-                        executeMethod(th, mem);
+                        executeMethod(th, o, mem);
                         tokens.add(System.mem.get("result").toToken());
+                    } else if (th.last().s().equals("[")) {
+                        o = executeClass(th, mem);
                     } else {
                         th.back();
-                        Variable var = getVar(current.s(), mem);
+                        Variable var = getVar(current.s(), o, mem);
                         if (var == null) throw new RuntimeException("Variable " + current.s() + " does not exist");
                         tokens.add(var.toToken());
                     }
                 }else{
-                    Variable var = getVar(current.s(), mem);
+                    Variable var = getVar(current.s(), o, mem);
                     if (var == null) throw new RuntimeException("Variable " + current.s() + " does not exist");
                     tokens.add(var.toToken());
                 }
@@ -106,44 +111,59 @@ public class Interpreter {
         return parser.createAST(new TokenHandler(tokens)).execute(this);
     }
 
-    private void executeMethod(TokenHandler th, Memory mem){
+    private void executeMethod(TokenHandler th, Object o, Memory mem){
         th.back();
         Method m = null; //= System.mem.getM(th.last().s());
         if(m == null) throw new RuntimeException("method didn't exist");
 
         String[] paras = getParas(th);
-        if(!m.pl.matches(paras)) throw new RuntimeException("method didn't exist");
+        if(!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
         Memory memory = m.pl.createMem(paras);
 
-        for(String l:m.code.split("\n")) execute(l, memory);
+        for(String l:m.code.split("\n")) execute(l, o, memory);
+    }
+
+    private Object executeClass(TokenHandler th, Memory mem) {
+        th.back();
+        String name = th.last().s();
+        Class c = System.mem.getC(name);
+        if(c == null) throw new RuntimeException("class didn't exist");
+
+        String[] paras = getParas(th);
+        if(!c.pl.matches(paras)) throw new RuntimeException("illegal argument ");
+
+        Object o = c.createObject();
+        System.mem.set(System.createName(name), o);
+
+        return o;
     }
 
     private String[] getParas(TokenHandler th){
         ArrayList<String> values = new ArrayList<>();
         th.next();
-        Token t = th.current();
+        String end = th.next().s().equals("(")?")":"]";
+        Token t = th.next();
 
-        while (!t.s().equals(")")){
+        while (!t.s().equals(end)){
             if(t.t() == Token.Type.OPERATOR) throw new RuntimeException("illegal argument");
             values.add(t.s());
-            th.next();
-            t = th.current();
-            if(t.s().equals(")")) break;
+            t = th.next();
+            if(t.s().equals(end)) break;
             if(!t.s().equals(",")) throw new RuntimeException("illegal argument");
             t = th.next();
         }
 
-        th.next();
+        if(th.hasNext()) th.next();
 
         return values.toArray(new String[0]);
     }
 
-    private Variable getVar(String name, Memory mem){
+    private Variable getVar(String name, Object o, Memory mem){
         if(mem != null && mem.exist(name)) return mem.get(name);
         return System.mem.get(name);
     }
 
-    private void setVar(String name, Variable var, Memory mem){
+    private void setVar(String name, Variable var, Object o, Memory mem){
         if(mem != null && (mem.exist(name) || !System.mem.exist(name))){
             mem.set(name, var);
         }else System.mem.set(name, var);

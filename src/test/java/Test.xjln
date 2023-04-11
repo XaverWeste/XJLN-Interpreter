@@ -1,8 +1,7 @@
 main
-    num x = 10
-    test = x + test(10)
+    test[10]
 end
 
-def test(num x)
-    result = x
+def test[num x]
+
 end
