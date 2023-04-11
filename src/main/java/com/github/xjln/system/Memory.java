@@ -75,4 +75,8 @@ public sealed class Memory permits Memory.SystemMemory, Memory.ClassMemory {
     public boolean exist(String name){
         return vars.containsKey(name);
     }
+
+    public void add(Memory mem){
+        for(String name:mem.vars.keySet()) set(name, mem.vars.get(name));
+    }
 }

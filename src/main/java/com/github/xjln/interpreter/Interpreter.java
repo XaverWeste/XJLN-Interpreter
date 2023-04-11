@@ -133,6 +133,7 @@ public class Interpreter {
         if(!c.pl.matches(paras)) throw new RuntimeException("illegal argument ");
 
         Object o = c.createObject();
+        o.mem.add(c.pl.createMem(paras));
         System.mem.set(System.createName(name), o);
 
         return o;
