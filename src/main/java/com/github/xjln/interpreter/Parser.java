@@ -1,5 +1,6 @@
 package com.github.xjln.interpreter;
 
+import com.github.xjln.lang.Class;
 import com.github.xjln.lang.Method;
 import com.github.xjln.lang.ParameterList;
 import com.github.xjln.lang.Variable;
@@ -46,30 +47,52 @@ public class Parser {
         while(sc.hasNextLine()){
             line = sc.nextLine().trim();
             if(line.equals("main")) sb.append(getContent(sc));
-            else if(line.startsWith("def")) parseMethodDef(sc, line);
+            else if(line.startsWith("def")) parseClassDef(sc, line);
             else if(!line.equals("")) throw new RuntimeException("illegal argument in \"" + line +"\"");
         }
 
         return sb.toString();
     }
 
-    private void parseMethodDef(java.util.Scanner sc, String current){
+    private void parseClassDef(java.util.Scanner sc, String current){
+        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        th.assertToken("def");
+        String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        th.assertToken("[");
+        Class c = new Class(parseParameterList(th));
+
+        current = sc.nextLine().trim();
+        while (!current.equals("end")){
+            if(current.startsWith("def")) parseMethodDef(sc, current, c);
+            else if(!current.equals("")) throw new RuntimeException("illegal argument in: " + current);
+            current = sc.nextLine().trim();
+        }
+
+        System.mem.set(name, c);
+    }
+
+    private void parseMethodDef(java.util.Scanner sc, String current, Class c){
         TokenHandler th = new TokenHandler(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");
+        c.mem.set(name, new Method(parseParameterList(th), getContent(sc)));
+    }
+
+    private ParameterList parseParameterList(TokenHandler th){
         ParameterList pl = new ParameterList();
+        String end = th.current().s().equals("(")?")":"]";
         Token t = th.next();
         Variable v;
-        while(!t.s().equals(")")){
-            if(!Set.of("var", "bool", "num", "str").contains(t.s())) throw new RuntimeException("illegal argument in \"" + current + "\"");
+        while (!t.s().equals(end)){
+            if(!Set.of("var", "bool", "num", "str").contains(t.s())) throw new RuntimeException("illegal argument");
             v = new Variable(t.s().equals("var")?"":t.s());
             t = th.assertToken(Token.Type.IDENTIFIER);
             pl.addParameter(t.s(), v);
             t = th.next();
-            if(!Set.of(",", ")").contains(t.s())) throw new RuntimeException("illegal argument in \"" + current + "\"");
+            if(!Set.of(",", end).contains(t.s())) throw new RuntimeException("illegal argument");
         }
-        System.mem.set(name, new Method(pl, getContent(sc)));
+        return pl;
     }
 
     private String getContent(java.util.Scanner sc){

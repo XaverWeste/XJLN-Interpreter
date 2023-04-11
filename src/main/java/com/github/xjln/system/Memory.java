@@ -1,7 +1,8 @@
 package com.github.xjln.system;
 
-
+import com.github.xjln.lang.Class;
 import com.github.xjln.lang.Method;
+import com.github.xjln.lang.Object;
 import com.github.xjln.lang.Variable;
 
 import java.util.HashMap;
@@ -10,7 +11,7 @@ public sealed class Memory permits Memory.SystemMemory, Memory.ClassMemory {
 
     public static final class SystemMemory extends Memory{
         private final HashMap<String,Class> classes=new HashMap<>();
-        private final HashMap<String,Object> objects=new HashMap<>();
+        private final HashMap<String, Object> objects=new HashMap<>();
 
         public SystemMemory(){
             vars.put("result",new Variable());

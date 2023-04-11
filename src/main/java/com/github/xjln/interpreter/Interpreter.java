@@ -108,7 +108,7 @@ public class Interpreter {
 
     private void executeMethod(TokenHandler th, Memory mem){
         th.back();
-        Method m = System.mem.getM(th.last().s());
+        Method m = null; //= System.mem.getM(th.last().s());
         if(m == null) throw new RuntimeException("method didn't exist");
 
         String[] paras = getParas(th);
