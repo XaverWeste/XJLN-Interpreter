@@ -33,7 +33,7 @@ public class Interpreter {
             }
         }catch (FileNotFoundException ignored){} //won't throw
 
-        java.lang.System.out.println("XJLN Process finished successfully");
+        java.lang.System.out.println("\nXJLN Process finished successfully\n");
     }
 
     private void execute(String line, Memory mem){
