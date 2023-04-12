@@ -68,7 +68,7 @@ public class Parser {
             current = sc.nextLine().trim();
         }
 
-        System.mem.set(name, c);
+        System.MEM.set(name, c);
     }
 
     private void parseMethodDef(java.util.Scanner sc, String current, Class c){

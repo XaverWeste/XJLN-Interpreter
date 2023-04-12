@@ -1,9 +1,8 @@
 package com.github.xjln.interpreter;
 
+import com.github.xjln.lang.*;
 import com.github.xjln.lang.Class;
-import com.github.xjln.lang.Method;
 import com.github.xjln.lang.Object;
-import com.github.xjln.lang.Variable;
 import com.github.xjln.system.Memory;
 import com.github.xjln.system.System;
 
@@ -100,7 +99,7 @@ public class Interpreter {
         if(th.hasNext()) {
             if (th.current().s().equals("(")) {
                 executeMethod(th, o, mem);
-                var = System.mem.get("result");
+                var = System.MEM.get("result");
             } else if (th.current().s().equals("[")) {
                 String clas = executeClass(th, mem);
                 return new Variable(clas.substring(1).split("§")[0], clas,false);
@@ -112,7 +111,7 @@ public class Interpreter {
                 if (!th.current().s().equals(":")) return var;
                 else {
                     if (!var.value().startsWith("§")) throw new RuntimeException("object expected");
-                    else return getVar(th, System.mem.getO(var.value()), null);
+                    else return getVar(th, System.MEM.getO(var.value()), null);
                 }
             }
         }else{
@@ -131,12 +130,13 @@ public class Interpreter {
         if(!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
         Memory memory = m.pl.createMem(paras);
 
+        if(m.code.trim().equals("native")) throw new RuntimeException();
         for(String l:m.code.split("\n")) execute(l, o, memory);
     }
 
     private String executeClass(TokenHandler th, Memory mem) {
         String name = th.last().s();
-        Class c = System.mem.getC(name);
+        Class c = System.MEM.getC(name);
         if(c == null) throw new RuntimeException("class didn't exist");
 
         String[] paras = getParas(th);
@@ -145,7 +145,7 @@ public class Interpreter {
         Object o = c.createObject();
         o.mem.add(c.pl.createMem(paras));
         name = System.createName(name);
-        System.mem.set(name, o);
+        System.MEM.set(name, o);
 
         return name;
     }
@@ -159,7 +159,7 @@ public class Interpreter {
             if(t.t() == Token.Type.OPERATOR) throw new RuntimeException("illegal argument");
             values.add(t.s());
             t = th.next();
-            if(t.s().equals(end)) break;
+            if(t.s().equals(end)) break; //TODO
             th.assertToken(",");
             t = th.next();
         }
@@ -172,13 +172,13 @@ public class Interpreter {
     private Variable getVar(String name, Object o, Memory mem){
         if(mem != null && mem.exist(name)) return mem.get(name);
         if(o != null && o.mem.exist(name)) return o.mem.get(name);
-        return System.mem.get(name);
+        return System.MEM.get(name);
     }
 
     private void setVar(String name, Variable var, Object o, Memory mem){
-        if(mem != null && (mem.exist(name) || !(System.mem.exist(name) || (o != null && o.mem.exist(name))))) mem.set(name, var);
-        else if(o != null && (o.mem.exist(name) || !(System.mem.exist(name)))) o.mem.set(name, var);
-        else System.mem.set(name, var);
+        if(mem != null && (mem.exist(name) || !(System.MEM.exist(name) || (o != null && o.mem.exist(name))))) mem.set(name, var);
+        else if(o != null && (o.mem.exist(name) || !(System.MEM.exist(name)))) o.mem.set(name, var);
+        else System.MEM.set(name, var);
     }
 
     public Token executeOperation(Token left, Token operator, Token right){
