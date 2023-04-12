@@ -83,37 +83,41 @@ public class Interpreter {
 
     private Token executeStatement(TokenHandler th, Object o, Memory mem){
         List<Token> tokens = new ArrayList<>();
-        Token current;
 
-        while (th.hasNext()){
-            if((current = th.next()).t() == Token.Type.IDENTIFIER){
-                if(th.hasNext()) {
-                    if (th.next().s().equals("(")) {
-                        executeMethod(th, o, mem);
-                        tokens.add(System.mem.get("result").toToken());
-                    } else if (th.last().s().equals("[")) {
-                        String object = executeClass(th, mem);
-                        tokens.add(new Token(object, Token.Type.IDENTIFIER));
-                    } else {
-                        th.back();
-                        Variable var = getVar(current.s(), o, mem);
-                        if (var == null) throw new RuntimeException("Variable " + current.s() + " does not exist");
-                        tokens.add(var.toToken());
-                    }
-                }else{
-                    Variable var = getVar(current.s(), o, mem);
-                    if (var == null) throw new RuntimeException("Variable " + current.s() + " does not exist");
-                    tokens.add(var.toToken());
-                }
-            }else tokens.add(current);
-        }
+        while (th.hasNext()) tokens.add((th.next().t() == Token.Type.IDENTIFIER) ? getVar(th, o, mem).toToken() : th.last());
 
         return parser.createAST(new TokenHandler(tokens)).execute(this);
     }
 
+    private Variable getVar(TokenHandler th, Object o, Memory mem){
+        Variable var;
+        if(th.hasNext()) {
+            if (th.current().s().equals("(")) {
+                executeMethod(th, o, mem);
+                var = System.mem.get("result");
+            } else if (th.current().s().equals("[")) {
+                return new Variable(executeClass(th, mem), "class", false);
+            } else {
+                var = getVar(th.current().s(), o, mem);
+                if (var == null) throw new RuntimeException("Variable " + th.current().s() + " does not exist");
+            }
+            if(var != null) {
+                if (!th.current().s().equals(":")) return var;
+                else {
+                    if (!var.value().startsWith("§")) throw new RuntimeException("object expected");
+                    else return getVar(th, System.mem.getO(var.value()), null);
+                }
+            }
+        }else{
+            var = getVar(th.current().s(), o, mem);
+            if (var == null) throw new RuntimeException("Variable " + th.current().s() + " does not exist");
+            return var;
+        }
+        throw new RuntimeException("illegal argument");
+    }
+
     private void executeMethod(TokenHandler th, Object o, Memory mem){
-        th.back();
-        Method m = null; //= System.mem.getM(th.last().s());
+        Method m = o.clas.mem.getM(th.last().s());
         if(m == null) throw new RuntimeException("method didn't exist");
 
         String[] paras = getParas(th);
@@ -124,7 +128,6 @@ public class Interpreter {
     }
 
     private String executeClass(TokenHandler th, Memory mem) {
-        th.back();
         String name = th.last().s();
         Class c = System.mem.getC(name);
         if(c == null) throw new RuntimeException("class didn't exist");
@@ -161,13 +164,14 @@ public class Interpreter {
 
     private Variable getVar(String name, Object o, Memory mem){
         if(mem != null && mem.exist(name)) return mem.get(name);
+        if(o != null && o.mem.exist(name)) return o.mem.get(name);
         return System.mem.get(name);
     }
 
     private void setVar(String name, Variable var, Object o, Memory mem){
-        if(mem != null && (mem.exist(name) || !System.mem.exist(name))){
-            mem.set(name, var);
-        }else System.mem.set(name, var);
+        if(mem != null && (mem.exist(name) || !(System.mem.exist(name) || (o != null && o.mem.exist(name))))) mem.set(name, var);
+        else if(o != null && (o.mem.exist(name) || !(System.mem.exist(name)))) o.mem.set(name, var);
+        else System.mem.set(name, var);
     }
 
     public Token executeOperation(Token left, Token operator, Token right){
