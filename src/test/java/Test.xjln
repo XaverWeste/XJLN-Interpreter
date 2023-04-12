@@ -1,5 +1,6 @@
 main
     t = test[10]
+    t:getX(2)
 end
 
 def test[num x]

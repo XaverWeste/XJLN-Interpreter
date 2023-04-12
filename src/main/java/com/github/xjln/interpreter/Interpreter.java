@@ -44,9 +44,15 @@ public class Interpreter {
             TokenHandler th = new TokenHandler(parser.scanner.getTokens(line));
             th.assertToken(Token.Type.IDENTIFIER);
 
-            if(th.current().s().equals("(")) executeMethod(th, o, mem);
-            else if(th.current().s().equals("[")) executeClass(th, mem);
-            else executeVarAssigment(th, o, mem);
+            switch(th.current().s()){
+                case "(" -> executeMethod(th, o, mem);
+                case "[" -> executeClass(th, mem);
+                case ":" ->{
+                    th.back();
+                    getVar(th, o, mem);
+                }
+                default -> executeVarAssigment(th, o, mem);
+            }
         }
     }
 
@@ -96,7 +102,8 @@ public class Interpreter {
                 executeMethod(th, o, mem);
                 var = System.mem.get("result");
             } else if (th.current().s().equals("[")) {
-                return new Variable(executeClass(th, mem), "class", false);
+                String clas = executeClass(th, mem);
+                return new Variable(clas.substring(1).split("§")[0], clas,false);
             } else {
                 var = getVar(th.current().s(), o, mem);
                 if (var == null) throw new RuntimeException("Variable " + th.current().s() + " does not exist");

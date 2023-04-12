@@ -64,7 +64,7 @@ public class Parser {
         current = sc.nextLine().trim();
         while (!current.equals("end")){
             if(current.startsWith("def")) parseMethodDef(sc, current, c);
-            else if(!current.equals("")) throw new RuntimeException("illegal argument in: " + current);
+            else if(!current.equals("") && !current.startsWith("#")) throw new RuntimeException("illegal argument in: " + current);
             current = sc.nextLine().trim();
         }
 
