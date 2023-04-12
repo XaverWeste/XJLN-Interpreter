@@ -1,7 +1,12 @@
 main
-    test(10)
+    t = test[10]
+    t:getX(2)
 end
 
-def test(num x)
+def test[num x]
+
+    def getX(num mal)
+        result = x * mal
+    end
 
 end

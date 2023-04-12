@@ -1,6 +1,6 @@
 package com.github.xjln.lang;
 
-import java.util.Objects;
+import com.github.xjln.interpreter.Token;
 
 public class Variable{
 
@@ -59,8 +59,16 @@ public class Variable{
         return constant;
     }
 
+    public Token toToken(){
+        return new Token(value, switch (getType(value)){
+            case "str" -> Token.Type.STRING;
+            case "num" -> Token.Type.NUMBER;
+            default -> Token.Type.IDENTIFIER;
+        });
+    }
+
     private void check(){
-        if(!type.equals("") && !value.equals("") && !getType(value).equals(type)) throw new RuntimeException("illegal argument");
+        if(!type.equals("") && !value.equals("") && !(type.equals("class") && value.startsWith("§")) && !getType(value).equals(type)) throw new RuntimeException("expected type " + type + " got " + getType(value));
     }
 
     public static String getType(String value){
@@ -68,6 +76,7 @@ public class Variable{
         if(value.matches("^[0-9.]+$")) return "num";
         if(value.equals("true")||value.equals("false")) return "bool";
         if(value.equals("")) return "";
+        if(value.startsWith("§")) return value.substring(1).split("§")[0];
         throw new RuntimeException("illegal argument");
     }
 }
