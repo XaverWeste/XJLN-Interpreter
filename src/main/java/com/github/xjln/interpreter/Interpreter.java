@@ -104,12 +104,16 @@ public class Interpreter {
                 String clas = executeClass(th, mem);
                 return new Variable(clas.substring(1).split("§")[0], clas,false);
             } else {
-                var = getVar(th.current().s(), o, mem);
+                var = getVar(th.last().s(), o, mem);
                 if (var == null) throw new RuntimeException("Variable " + th.current().s() + " does not exist");
             }
             if(var != null) {
+                if(!th.hasNext()) return var;
+                th.next();
                 if (!th.current().s().equals(":")) return var;
                 else {
+                    th.next();
+                    th.next();
                     if (!var.value().startsWith("§")) throw new RuntimeException("object expected");
                     else return getVar(th, System.MEM.getO(var.value()), null);
                 }
@@ -134,7 +138,6 @@ public class Interpreter {
             if (!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
             Memory memory = m.pl.createMem(paras);
 
-            if (m.code.trim().equals("native")) throw new RuntimeException();
             for (String l : m.code.split("\n")) execute(l, o, memory);
         }
     }
