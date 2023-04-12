@@ -1,7 +1,11 @@
 main
-    test[10]
+    t = test[10]
 end
 
 def test[num x]
+
+    def getX(num mal)
+        result = x * mal
+    end
 
 end

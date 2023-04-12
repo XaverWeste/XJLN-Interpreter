@@ -81,16 +81,19 @@ public class Parser {
 
     private ParameterList parseParameterList(TokenHandler th){
         ParameterList pl = new ParameterList();
-        String end = th.current().s().equals("(")?")":"]";
-        Token t = th.next();
+        String end = th.last().s().equals("(")?")":"]";
+        Token t = th.current();
         Variable v;
         while (!t.s().equals(end)){
             if(!Set.of("var", "bool", "num", "str").contains(t.s())) throw new RuntimeException("illegal argument");
             v = new Variable(t.s().equals("var")?"":t.s());
+            th.next();
             t = th.assertToken(Token.Type.IDENTIFIER);
             pl.addParameter(t.s(), v);
             t = th.next();
-            if(!Set.of(",", end).contains(t.s())) throw new RuntimeException("illegal argument");
+            if(t.s().equals(end)) break;
+            if(!t.s().equals(",")) throw new RuntimeException("expected comma got " + t.s());
+            t = th.next();
         }
         return pl;
     }

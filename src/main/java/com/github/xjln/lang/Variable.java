@@ -68,7 +68,7 @@ public class Variable{
     }
 
     private void check(){
-        if(!type.equals("") && !value.equals("") && !getType(value).equals(type)) throw new RuntimeException("illegal argument");
+        if(!type.equals("") && !value.equals("") && !(type.equals("class") && value.startsWith("§")) && !getType(value).equals(type)) throw new RuntimeException("illegal argument");
     }
 
     public static String getType(String value){
@@ -76,6 +76,6 @@ public class Variable{
         if(value.matches("^[0-9.]+$")) return "num";
         if(value.equals("true")||value.equals("false")) return "bool";
         if(value.equals("")) return "";
-        throw new RuntimeException("illegal argument");
+        return "class";
     }
 }

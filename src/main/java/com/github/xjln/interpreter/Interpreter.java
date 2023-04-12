@@ -51,7 +51,6 @@ public class Interpreter {
     }
 
     private void executeVarAssigment(TokenHandler th, Object o, Memory mem){
-        th.back();
         if(th.current().t() == Token.Type.IDENTIFIER){
             String type = th.last().s();
             String name = th.next().s();
@@ -93,7 +92,8 @@ public class Interpreter {
                         executeMethod(th, o, mem);
                         tokens.add(System.mem.get("result").toToken());
                     } else if (th.last().s().equals("[")) {
-                        o = executeClass(th, mem);
+                        String object = executeClass(th, mem);
+                        tokens.add(new Token(object, Token.Type.IDENTIFIER));
                     } else {
                         th.back();
                         Variable var = getVar(current.s(), o, mem);
@@ -123,7 +123,7 @@ public class Interpreter {
         for(String l:m.code.split("\n")) execute(l, o, memory);
     }
 
-    private Object executeClass(TokenHandler th, Memory mem) {
+    private String executeClass(TokenHandler th, Memory mem) {
         th.back();
         String name = th.last().s();
         Class c = System.mem.getC(name);
@@ -134,14 +134,14 @@ public class Interpreter {
 
         Object o = c.createObject();
         o.mem.add(c.pl.createMem(paras));
-        System.mem.set(System.createName(name), o);
+        name = System.createName(name);
+        System.mem.set(name, o);
 
-        return o;
+        return name;
     }
 
     private String[] getParas(TokenHandler th){
         ArrayList<String> values = new ArrayList<>();
-        th.next();
         String end = th.next().s().equals("(")?")":"]";
         Token t = th.next();
 
@@ -150,7 +150,7 @@ public class Interpreter {
             values.add(t.s());
             t = th.next();
             if(t.s().equals(end)) break;
-            if(!t.s().equals(",")) throw new RuntimeException("illegal argument");
+            th.assertToken(",");
             t = th.next();
         }
 

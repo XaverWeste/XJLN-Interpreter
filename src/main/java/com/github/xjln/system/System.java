@@ -5,7 +5,7 @@ public class System {
 
     public static String createName(String className){
         StringBuilder sb = new StringBuilder();
-        sb.append("§").append(className);
+        sb.append("§").append(className).append("§");
         int i = 0;
         while(mem.exist(sb.toString() + i)) i++;
         sb.append(i);
