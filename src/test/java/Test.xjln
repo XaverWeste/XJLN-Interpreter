@@ -1,12 +1,6 @@
 main
-    t = test[10]
-    t:getX(2)
+    s = System[]
+    s:log(1)
 end
 
-def test[num x]
-
-    def getX(num mal)
-        result = x * mal
-    end
-
-end
+def native System[]

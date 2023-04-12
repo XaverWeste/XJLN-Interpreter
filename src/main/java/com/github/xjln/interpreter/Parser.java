@@ -1,9 +1,8 @@
 package com.github.xjln.interpreter;
 
+import com.github.xjln.lang.*;
 import com.github.xjln.lang.Class;
-import com.github.xjln.lang.Method;
-import com.github.xjln.lang.ParameterList;
-import com.github.xjln.lang.Variable;
+import com.github.xjln.lang.Object;
 import com.github.xjln.system.System;
 
 import java.io.File;
@@ -58,14 +57,24 @@ public class Parser {
         TokenHandler th = new TokenHandler(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
-        th.assertToken("[");
-        Class c = new Class(parseParameterList(th));
-
-        current = sc.nextLine().trim();
-        while (!current.equals("end")){
-            if(current.startsWith("def")) parseMethodDef(sc, current, c);
-            else if(!current.equals("") && !current.startsWith("#")) throw new RuntimeException("illegal argument in: " + current);
+        Class c;
+        if(name.equals("native")){
+            name = th.assertToken(Token.Type.IDENTIFIER).s();
+            th.assertToken("[");
+            th.assertToken("]");
+            switch (name){
+                case "System" -> c = new com.github.xjln.nativ.System();
+                default -> throw new RuntimeException("class " + name + " is not defined natively");
+            }
+        }else{
+            th.assertToken("[");
+            c = new Class(parseParameterList(th));
             current = sc.nextLine().trim();
+            while (!current.equals("end")){
+                if(current.startsWith("def")) parseMethodDef(sc, current, c);
+                else if(!current.equals("") && !current.startsWith("#")) throw new RuntimeException("illegal argument in: " + current);
+                current = sc.nextLine().trim();
+            }
         }
 
         System.MEM.set(name, c);

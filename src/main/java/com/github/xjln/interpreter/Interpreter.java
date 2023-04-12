@@ -104,12 +104,16 @@ public class Interpreter {
                 String clas = executeClass(th, mem);
                 return new Variable(clas.substring(1).split("§")[0], clas,false);
             } else {
-                var = getVar(th.current().s(), o, mem);
+                var = getVar(th.last().s(), o, mem);
                 if (var == null) throw new RuntimeException("Variable " + th.current().s() + " does not exist");
             }
             if(var != null) {
+                if(!th.hasNext()) return var;
+                th.next();
                 if (!th.current().s().equals(":")) return var;
                 else {
+                    th.next();
+                    th.next();
                     if (!var.value().startsWith("§")) throw new RuntimeException("object expected");
                     else return getVar(th, System.MEM.getO(var.value()), null);
                 }
@@ -123,15 +127,19 @@ public class Interpreter {
     }
 
     private void executeMethod(TokenHandler th, Object o, Memory mem){
-        Method m = o.clas.mem.getM(th.last().s());
-        if(m == null) throw new RuntimeException("method didn't exist");
-
+        String methodName = th.last().s();
         String[] paras = getParas(th);
-        if(!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
-        Memory memory = m.pl.createMem(paras);
 
-        if(m.code.trim().equals("native")) throw new RuntimeException();
-        for(String l:m.code.split("\n")) execute(l, o, memory);
+        if(o.clas instanceof NativeClass) ((NativeClass) o.clas).execute(methodName, paras, o);
+        else {
+            Method m = o.clas.mem.getM(methodName);
+            if (m == null) throw new RuntimeException("method didn't exist");
+
+            if (!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
+            Memory memory = m.pl.createMem(paras);
+
+            for (String l : m.code.split("\n")) execute(l, o, memory);
+        }
     }
 
     private String executeClass(TokenHandler th, Memory mem) {
