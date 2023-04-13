@@ -1,7 +1,9 @@
 main
-    s = System[]
-    num n = 1+ 1
-    s:log(n * 2 % 2 == 0)
+    System:log("abc")
 end
 
-def native System[]
+def System[/]
+
+    native log(str s)
+
+end
