@@ -32,7 +32,7 @@ public class Interpreter {
                     throw exception;
                 }
             }
-        }catch (FileNotFoundException ignored){} //won't throw
+        }catch (FileNotFoundException ignored){} // won't throw
 
         java.lang.System.out.println("\nXJLN Process finished successfully\n");
     }

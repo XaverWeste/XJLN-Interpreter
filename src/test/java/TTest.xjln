@@ -1,0 +1,9 @@
+main
+    System:log("def")
+end
+
+def System[/]
+
+    native log(str s)
+
+end

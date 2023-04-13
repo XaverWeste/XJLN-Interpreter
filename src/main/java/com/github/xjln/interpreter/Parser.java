@@ -46,10 +46,20 @@ public class Parser {
             line = sc.nextLine().trim();
             if(line.equals("main")) sb.append(getContent(sc));
             else if(line.startsWith("def")) parseClassDef(sc, line);
+            else if(line.startsWith("use")) sb.append(parseFile(line));
             else if(!line.equals("")) throw new RuntimeException("illegal argument in \"" + line +"\"");
         }
 
         return sb.toString();
+    }
+
+    private String parseFile(String current) throws FileNotFoundException { //TODO correct path
+        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        th.assertToken("use");
+        if(!th.hasNext()) throw new RuntimeException("expected filename");
+        File file = new File("src/test/java/" + current.split(" ")[1] + ".xjln");
+        if(!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
+        return parseFile(file);
     }
 
     private void parseClassDef(java.util.Scanner sc, String current){

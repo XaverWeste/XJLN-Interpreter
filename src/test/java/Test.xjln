@@ -1,9 +1,5 @@
+use TTest
+
 main
     System:log("abc")
-end
-
-def System[/]
-
-    native log(str s)
-
 end
