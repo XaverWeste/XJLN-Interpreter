@@ -19,7 +19,7 @@ public class System {
 
     public static NativeMethod getNativeMethod(String className, String methodName, ParameterList pl){
         return switch (className){
-            case "System" -> switch (methodName){
+            case "$" -> switch (methodName){
                 case "log" -> new NativeMethod(pl, (o, mem) -> java.lang.System.out.println(mem.vars.get("s").value()));
                 default -> throw new RuntimeException();
             };

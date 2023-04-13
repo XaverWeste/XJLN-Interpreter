@@ -19,7 +19,9 @@ public class TokenHandler {
 
     public Token assertToken(Token.Type t){
         if(index > tokens.size()) throw new RuntimeException("Expected " + t.toString() + " got nothing");
-        if(tokens.get(index).t() != t) throw new RuntimeException("Expected " + t.toString() + " got " + tokens.get(index).t().toString());
+        if(tokens.get(index).t() != t){
+            if(tokens.get(index).t() != Token.Type.SIMPLE|| !(t == Token.Type.IDENTIFIER)) throw new RuntimeException("Expected " + t.toString() + " got " + tokens.get(index).t().toString());
+        }
         index++;
         return tokens.get(index - 1);
     }

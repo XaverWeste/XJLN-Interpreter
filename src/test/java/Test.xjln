@@ -1,5 +1,5 @@
 use TTest
 
 main
-    System:log("abc")
+    $:log("abc")
 end

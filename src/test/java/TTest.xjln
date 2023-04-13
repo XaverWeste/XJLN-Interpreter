@@ -1,8 +1,8 @@
 main
-    System:log("def")
+    $:log("def")
 end
 
-def System[/]
+def $[/]
 
     native log(str s)
 
