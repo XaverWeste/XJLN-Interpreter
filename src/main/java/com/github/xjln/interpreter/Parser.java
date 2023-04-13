@@ -2,7 +2,6 @@ package com.github.xjln.interpreter;
 
 import com.github.xjln.lang.*;
 import com.github.xjln.lang.Class;
-import com.github.xjln.lang.Object;
 import com.github.xjln.system.System;
 
 import java.io.File;
