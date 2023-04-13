@@ -47,7 +47,7 @@ public class Scanner {
                 String valueString = value.toString();
 
                 if(valueString.equals("true") || valueString.equals("false")) tokens.add(new Token(valueString, Token.Type.BOOL));
-                tokens.add(new Token(valueString, Token.Type.IDENTIFIER));
+                else tokens.add(new Token(valueString, Token.Type.IDENTIFIER));
 
             }else if(isOperator(chars[i])){
 

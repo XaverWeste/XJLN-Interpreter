@@ -6,6 +6,7 @@ import com.github.xjln.lang.Object;
 import com.github.xjln.system.Memory;
 import com.github.xjln.system.System;
 
+import javax.management.RuntimeOperationsException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class Interpreter {
 
     private void execute(String line, Object o, Memory mem){
         line = line.trim();
-        if(!(line.equals("") || line.startsWith("#"))){
+        if(!line.equals("")){
             TokenHandler th = new TokenHandler(parser.scanner.getTokens(line));
             th.assertToken(Token.Type.IDENTIFIER);
 
@@ -122,7 +123,7 @@ public class Interpreter {
                 }
             }
         }else{
-            var = getVar(th.current().s(), o, mem);
+            var = getVar(th.last().s(), o, mem);
             if (var == null) throw new RuntimeException("Variable " + th.current().s() + " does not exist");
             return var;
         }

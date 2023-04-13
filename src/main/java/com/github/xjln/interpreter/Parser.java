@@ -73,7 +73,7 @@ public class Parser {
         current = sc.nextLine().trim();
         while (!current.equals("end")){
             if(current.startsWith("def")) parseMethodDef(sc, current, c);
-            if(current.startsWith("native")) parseMethodDef(current, c, name);
+            else if(current.startsWith("native")) parseMethodDef(current, c, name);
             else if(!current.equals("") && !current.startsWith("#")) throw new RuntimeException("illegal argument in: " + current);
             current = sc.nextLine().trim();
         }
@@ -134,7 +134,7 @@ public class Parser {
                 if(!line.equals("end")) throw new RuntimeException();
                 i--;
             }
-            if(i > 0) sb.append(line).append("\n");
+            if(i > 0 && !line.startsWith("#")) sb.append(line).append("\n");
         }
 
         if(i > 0) throw new RuntimeException("Method was not closed");
