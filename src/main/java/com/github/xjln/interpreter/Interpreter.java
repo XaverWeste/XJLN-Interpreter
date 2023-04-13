@@ -32,7 +32,7 @@ public class Interpreter {
                     throw exception;
                 }
             }
-        }catch (FileNotFoundException ignored){} //won't throw
+        }catch (FileNotFoundException ignored){} // won't throw
 
         java.lang.System.out.println("\nXJLN Process finished successfully\n");
     }
@@ -45,7 +45,7 @@ public class Interpreter {
 
             switch(th.current().s()){
                 case "(" -> executeMethod(th, o, mem);
-                case "[" -> executeClass(th, mem);
+                case "[" -> executeClass(th, o, mem);
                 case ":" ->{
                     th.back();
                     getVar(th, o, mem);
@@ -101,7 +101,7 @@ public class Interpreter {
                 executeMethod(th, o, mem);
                 var = System.MEM.get("result");
             } else if (th.current().s().equals("[")) {
-                String clas = executeClass(th, mem);
+                String clas = executeClass(th, o, mem);
                 return new Variable(clas.substring(1).split("§")[0], clas,false);
             } else {
                 var = getVar(th.last().s(), o, mem);
@@ -110,7 +110,10 @@ public class Interpreter {
             if(var != null) {
                 if(!th.hasNext()) return var;
                 th.next();
-                if (!th.current().s().equals(":")) return var;
+                if (!th.current().s().equals(":")){
+                    th.back();
+                    return var;
+                }
                 else {
                     th.next();
                     th.next();
@@ -128,52 +131,55 @@ public class Interpreter {
 
     private void executeMethod(TokenHandler th, Object o, Memory mem){
         String methodName = th.last().s();
-        String[] paras = getParas(th);
+        String[] paras = getParas(th, o, mem);
 
-        if(o.clas instanceof NativeClass) ((NativeClass) o.clas).execute(methodName, paras, o);
-        else {
-            Method m = o.clas.mem.getM(methodName);
-            if (m == null) throw new RuntimeException("method didn't exist");
+        Method m = o.clas.mem.getM(methodName);
+        if (m == null) throw new RuntimeException("method didn't exist");
 
-            if (!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
-            Memory memory = m.pl.createMem(paras);
+        if (!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
+        mem = m.pl.createMem(paras);
 
-            for (String l : m.code.split("\n")) execute(l, o, memory);
-        }
+        if(m instanceof NativeMethod) ((NativeMethod)m).code.execute(o, mem);
+        else for (String l : m.code.split("\n")) execute(l, o, mem);
     }
 
-    private String executeClass(TokenHandler th, Memory mem) {
+    private String executeClass(TokenHandler th, Object o, Memory mem) {
         String name = th.last().s();
         Class c = System.MEM.getC(name);
         if(c == null) throw new RuntimeException("class didn't exist");
 
-        String[] paras = getParas(th);
+        String[] paras = getParas(th, o, mem);
         if(!c.pl.matches(paras)) throw new RuntimeException("illegal argument ");
 
-        Object o = c.createObject();
-        o.mem.add(c.pl.createMem(paras));
+        Object obj = c.createObject();
+        obj.mem.add(c.pl.createMem(paras));
         name = System.createName(name);
-        System.MEM.set(name, o);
+        System.MEM.set(name, obj);
 
         return name;
     }
 
-    private String[] getParas(TokenHandler th){
+    private String[] getParas(TokenHandler th, Object o, Memory mem){
         ArrayList<String> values = new ArrayList<>();
         String end = th.next().s().equals("(")?")":"]";
         Token t = th.next();
+        ArrayList<Token> operation = new ArrayList<>();
 
         while (!t.s().equals(end)){
-            if(t.t() == Token.Type.OPERATOR) throw new RuntimeException("illegal argument");
-            values.add(t.s());
+            if(t.t() == Token.Type.OPERATOR) throw new RuntimeException("expected value");
+            operation.add(t);
             t = th.next();
-            if(t.s().equals(end)) break; //TODO
-            th.assertToken(",");
+            while(!t.s().equals(end) && !t.s().equals(",")){
+                operation.add(t);
+                t = th.next();
+            }
+            values.add(executeStatement(new TokenHandler(operation), o, mem).s());
+            if(t.s().equals(end)) break;
+            operation = new ArrayList<>();
             t = th.next();
         }
 
         if(th.hasNext()) th.next();
-
         return values.toArray(new String[0]);
     }
 

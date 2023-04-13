@@ -2,7 +2,6 @@ package com.github.xjln.interpreter;
 
 import com.github.xjln.lang.*;
 import com.github.xjln.lang.Class;
-import com.github.xjln.lang.Object;
 import com.github.xjln.system.System;
 
 import java.io.File;
@@ -47,10 +46,20 @@ public class Parser {
             line = sc.nextLine().trim();
             if(line.equals("main")) sb.append(getContent(sc));
             else if(line.startsWith("def")) parseClassDef(sc, line);
+            else if(line.startsWith("use")) sb.append(parseFile(line));
             else if(!line.equals("")) throw new RuntimeException("illegal argument in \"" + line +"\"");
         }
 
         return sb.toString();
+    }
+
+    private String parseFile(String current) throws FileNotFoundException { //TODO correct path
+        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        th.assertToken("use");
+        if(!th.hasNext()) throw new RuntimeException("expected filename");
+        File file = new File("src/test/java/" + current.split(" ")[1] + ".xjln");
+        if(!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
+        return parseFile(file);
     }
 
     private void parseClassDef(java.util.Scanner sc, String current){
@@ -58,26 +67,20 @@ public class Parser {
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         Class c;
-        if(name.equals("native")){
-            name = th.assertToken(Token.Type.IDENTIFIER).s();
-            th.assertToken("[");
-            th.assertToken("]");
-            switch (name){
-                case "System" -> c = new com.github.xjln.nativ.System();
-                default -> throw new RuntimeException("class " + name + " is not defined natively");
-            }
-        }else{
-            th.assertToken("[");
-            c = new Class(parseParameterList(th));
+        th.assertToken("[");
+        ParameterList pl = parseParameterList(th);
+        c = new Class(pl);
+        current = sc.nextLine().trim();
+        while (!current.equals("end")){
+            if(current.startsWith("def")) parseMethodDef(sc, current, c);
+            if(current.startsWith("native")) parseMethodDef(current, c, name);
+            else if(!current.equals("") && !current.startsWith("#")) throw new RuntimeException("illegal argument in: " + current);
             current = sc.nextLine().trim();
-            while (!current.equals("end")){
-                if(current.startsWith("def")) parseMethodDef(sc, current, c);
-                else if(!current.equals("") && !current.startsWith("#")) throw new RuntimeException("illegal argument in: " + current);
-                current = sc.nextLine().trim();
-            }
         }
 
         System.MEM.set(name, c);
+        System.MEM.set("§" + name, c.createObject());
+        System.MEM.set(name, new Variable(name, "§" + name, true));
     }
 
     private void parseMethodDef(java.util.Scanner sc, String current, Class c){
@@ -85,10 +88,23 @@ public class Parser {
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");
-        c.mem.set(name, new Method(parseParameterList(th), getContent(sc)));
+        ParameterList pl = parseParameterList(th);
+        if(pl == null) throw new RuntimeException("tried to define " + name + "() static");
+        c.mem.set(name, new Method(pl, getContent(sc)));
+    }
+
+    private void parseMethodDef(String current, Class c, String className){
+        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        th.assertToken("native");
+        String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        th.assertToken("(");
+        ParameterList pl = parseParameterList(th);
+        if(pl == null) throw new RuntimeException("tried to define " + name + "() static");
+        c.mem.set(name, System.getNativeMethod(className, name, pl));
     }
 
     private ParameterList parseParameterList(TokenHandler th){
+        if(th.current().s().equals("/")) return null;
         ParameterList pl = new ParameterList();
         String end = th.last().s().equals("(")?")":"]";
         Token t = th.current();

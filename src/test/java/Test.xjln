@@ -1,6 +1,5 @@
-main
-    s = System[]
-    s:log(1)
-end
+use TTest
 
-def native System[]
+main
+    $:log("abc")
+end

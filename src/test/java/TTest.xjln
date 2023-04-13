@@ -1,0 +1,9 @@
+main
+    $:log("def")
+end
+
+def $[/]
+
+    native log(str s)
+
+end
