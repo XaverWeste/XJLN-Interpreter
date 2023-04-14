@@ -6,7 +6,6 @@ import com.github.xjln.lang.Object;
 import com.github.xjln.system.Memory;
 import com.github.xjln.system.System;
 
-import javax.management.RuntimeOperationsException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public class Interpreter {
     private void execute(String line, Object o, Memory mem){
         line = line.trim();
         if(!line.equals("")){
-            TokenHandler th = new TokenHandler(parser.scanner.getTokens(line));
+            TokenHandlerOld th = new TokenHandlerOld(parser.scanner.getTokens(line));
             th.assertToken(Token.Type.IDENTIFIER);
 
             switch(th.current().s()){
@@ -56,7 +55,7 @@ public class Interpreter {
         }
     }
 
-    private void executeVarAssigment(TokenHandler th, Object o, Memory mem){
+    private void executeVarAssigment(TokenHandlerOld th, Object o, Memory mem){
         if(th.current().t() == Token.Type.IDENTIFIER){
             String type = th.last().s();
             String name = th.next().s();
@@ -87,15 +86,15 @@ public class Interpreter {
         }
     }
 
-    private Token executeStatement(TokenHandler th, Object o, Memory mem){
+    private Token executeStatement(TokenHandlerOld th, Object o, Memory mem){
         List<Token> tokens = new ArrayList<>();
 
         while (th.hasNext()) tokens.add((th.next().t() == Token.Type.IDENTIFIER) ? getVar(th, o, mem).toToken() : th.last());
 
-        return parser.createAST(new TokenHandler(tokens)).execute(this);
+        return parser.createAST(new TokenHandlerOld(tokens)).execute(this);
     }
 
-    private Variable getVar(TokenHandler th, Object o, Memory mem){
+    private Variable getVar(TokenHandlerOld th, Object o, Memory mem){
         Variable var;
         if(th.hasNext()) {
             if(th.current().s().equals("$")) th.next();
@@ -128,7 +127,7 @@ public class Interpreter {
         throw new RuntimeException("illegal argument");
     }
 
-    private void executeMethod(TokenHandler th, Object o, Memory mem){
+    private void executeMethod(TokenHandlerOld th, Object o, Memory mem){
         String methodName = th.last().s();
         String[] paras = getParas(th, o, mem);
 
@@ -142,7 +141,7 @@ public class Interpreter {
         else for (String l : m.code.split("\n")) execute(l, o, mem);
     }
 
-    private String executeClass(TokenHandler th, Object o, Memory mem) {
+    private String executeClass(TokenHandlerOld th, Object o, Memory mem) {
         String name = th.last().s();
         Class c = System.MEM.getC(name);
         if(c == null) throw new RuntimeException("class didn't exist");
@@ -158,7 +157,7 @@ public class Interpreter {
         return name;
     }
 
-    private String[] getParas(TokenHandler th, Object o, Memory mem){
+    private String[] getParas(TokenHandlerOld th, Object o, Memory mem){
         ArrayList<String> values = new ArrayList<>();
         String end = th.next().s().equals("(")?")":"]";
         Token t = th.next();
@@ -172,7 +171,7 @@ public class Interpreter {
                 operation.add(t);
                 t = th.next();
             }
-            values.add(executeStatement(new TokenHandler(operation), o, mem).s());
+            values.add(executeStatement(new TokenHandlerOld(operation), o, mem).s());
             if(t.s().equals(end)) break;
             operation = new ArrayList<>();
             t = th.next();
@@ -195,10 +194,10 @@ public class Interpreter {
     }
 
     public Token executeOperation(Token left, Token operator, Token right){
-        TokenHandler.assertToken(operator, Token.Type.OPERATOR);
+        TokenHandlerOld.assertToken(operator, Token.Type.OPERATOR);
         switch(left.t()){
             case NUMBER -> {
-                TokenHandler.assertToken(right, Token.Type.NUMBER);
+                TokenHandlerOld.assertToken(right, Token.Type.NUMBER);
                 double first = Double.parseDouble(left.s());
                 double second = Double.parseDouble(right.s());
                 switch (operator.s()){
@@ -212,7 +211,7 @@ public class Interpreter {
                 }
             }
             case BOOL -> {
-                TokenHandler.assertToken(right, Token.Type.BOOL);
+                TokenHandlerOld.assertToken(right, Token.Type.BOOL);
                 boolean first = Boolean.parseBoolean(left.s());
                 boolean second = Boolean.parseBoolean(right.s());
                 switch (operator.s()){

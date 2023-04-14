@@ -2,12 +2,12 @@ package com.github.xjln.interpreter;
 
 import java.util.List;
 
-public class TokenHandler {
+public class TokenHandlerOld {
 
     private final List<Token> tokens;
     private int index = 0;
 
-    public TokenHandler(List<Token> tokens){
+    public TokenHandlerOld(List<Token> tokens){
         this.tokens = tokens;
     }
 

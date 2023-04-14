@@ -16,7 +16,7 @@ public class Parser {
         scanner = new Scanner();
     }
 
-    public AST createAST(TokenHandler th){
+    public AST createAST(TokenHandlerOld th){
         AST.Operation ast = new AST.Operation();
         ast.token = th.next();
 
@@ -54,7 +54,7 @@ public class Parser {
     }
 
     private String parseFile(String current) throws FileNotFoundException { //TODO correct path
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        TokenHandlerOld th = new TokenHandlerOld(scanner.getTokens(current));
         th.assertToken("use");
         if(!th.hasNext()) throw new RuntimeException("expected filename");
         File file = new File("src/test/java/" + current.split(" ")[1] + ".xjln");
@@ -63,7 +63,7 @@ public class Parser {
     }
 
     private void parseClassDef(java.util.Scanner sc, String current){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        TokenHandlerOld th = new TokenHandlerOld(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         Class c;
@@ -84,7 +84,7 @@ public class Parser {
     }
 
     private void parseMethodDef(java.util.Scanner sc, String current, Class c){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        TokenHandlerOld th = new TokenHandlerOld(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");
@@ -94,7 +94,7 @@ public class Parser {
     }
 
     private void parseMethodDef(String current, Class c, String className){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        TokenHandlerOld th = new TokenHandlerOld(scanner.getTokens(current));
         th.assertToken("native");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");
@@ -103,7 +103,7 @@ public class Parser {
         c.mem.set(name, System.getNativeMethod(className, name, pl));
     }
 
-    private ParameterList parseParameterList(TokenHandler th){
+    private ParameterList parseParameterList(TokenHandlerOld th){
         if(th.current().s().equals("/")) return null;
         ParameterList pl = new ParameterList();
         String end = th.last().s().equals("(")?")":"]";
