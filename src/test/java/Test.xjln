@@ -1,5 +1,9 @@
-use TTest
+use System
 
 main
-    $:log("abc")
+    num x = 1
+    $:log(x)
+    $:log(y = (1 + x = 2))
+    $:log(x)
+    $:log(y)
 end

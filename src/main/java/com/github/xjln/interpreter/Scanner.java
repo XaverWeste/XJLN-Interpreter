@@ -44,10 +44,7 @@ public class Scanner {
                     value.append(chars[i]);
                 }
 
-                String valueString = value.toString();
-
-                if(valueString.equals("true") || valueString.equals("false")) tokens.add(new Token(valueString, Token.Type.BOOL));
-                tokens.add(new Token(valueString, Token.Type.IDENTIFIER));
+                tokens.add(new Token(value.toString(), Set.of("true", "false").contains(value.toString()) ? Token.Type.BOOL : Token.Type.IDENTIFIER));
 
             }else if(isOperator(chars[i])){
 
@@ -77,7 +74,7 @@ public class Scanner {
 
             }else if(!Set.of('\n', '\r', '\t', ' ').contains(chars[i])){
 
-                tokens.add(new Token(String.valueOf(chars[i]), Token.Type.SIMPLE));
+                tokens.add(new Token(String.valueOf(chars[i]), Set.of('$', '§').contains(chars[i]) ? Token.Type.IDENTIFIER : Token.Type.SIMPLE));
 
             }
 

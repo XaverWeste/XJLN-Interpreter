@@ -30,19 +30,19 @@ public class Variable{
     }
 
     public void set(Variable var){
-        if(!constant&&(type==null|| type.equals(var.type))){
+        if(!(constant && !value.equals("")) && (type.equals("") || type.equals(var.type))){
             value=var.value;
-        }
+        } else throw new RuntimeException("illegal argument");
     }
 
     public void set(String val,String ty){
-        if(!constant&&(type.equals("")|| type.equals(ty))){
+        if(!(constant && !value.equals("")) && (type.equals("") || type.equals(ty))){
             value=val;
-        }
+        } else throw new RuntimeException("illegal argument");
     }
 
     public boolean canSet(String val){
-        if(constant) return false;
+        if(constant && !value.equals("")) return false;
         if(type.equals("")) return true;
         return getType(val).equals(type);
     }
@@ -63,6 +63,7 @@ public class Variable{
         return new Token(value, switch (getType(value)){
             case "str" -> Token.Type.STRING;
             case "num" -> Token.Type.NUMBER;
+            case "bool" -> Token.Type.BOOL;
             default -> Token.Type.IDENTIFIER;
         });
     }
@@ -76,7 +77,8 @@ public class Variable{
         if(value.matches("^[0-9.]+$")) return "num";
         if(value.equals("true")||value.equals("false")) return "bool";
         if(value.equals("")) return "";
+        if(value.startsWith("§§§")) return "§";
         if(value.startsWith("§")) return value.substring(1).split("§")[0];
-        throw new RuntimeException("illegal argument");
+        throw new RuntimeException("illegal variable type");
     }
 }

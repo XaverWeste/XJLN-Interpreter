@@ -16,16 +16,16 @@ public class Parser {
         scanner = new Scanner();
     }
 
-    public AST createAST(TokenHandler th){
+    public AST createAST(Tokenhandler th){
         AST.Operation ast = new AST.Operation();
         ast.token = th.next();
 
+        AST.Operation last;
         Token op;
 
-        while(th.hasNext()){
+        while (th.hasNext()){
             op = th.assertToken(Token.Type.OPERATOR);
-            if(!th.hasNext()) throw new RuntimeException("illegal argument");
-            AST.Operation last = ast;
+            last = ast;
             ast = new AST.Operation();
             ast.left = last;
             ast.token = op;
@@ -53,72 +53,70 @@ public class Parser {
         return sb.toString();
     }
 
-    private String parseFile(String current) throws FileNotFoundException { //TODO correct path
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+    private String parseFile(String current) throws FileNotFoundException {
+        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
         th.assertToken("use");
-        if(!th.hasNext()) throw new RuntimeException("expected filename");
+        th.assertToken(Token.Type.IDENTIFIER);
         File file = new File("src/test/java/" + current.split(" ")[1] + ".xjln");
         if(!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
         return parseFile(file);
     }
 
     private void parseClassDef(java.util.Scanner sc, String current){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
-        Class c;
         th.assertToken("[");
-        ParameterList pl = parseParameterList(th);
-        c = new Class(pl);
+        ParameterList pl = parseParameterList(th.getInBracket());
+        Class c = new Class(pl);
         current = sc.nextLine().trim();
+
         while (!current.equals("end")){
             if(current.startsWith("def")) parseMethodDef(sc, current, c);
-            if(current.startsWith("native")) parseMethodDef(current, c, name);
+            else if(current.startsWith("native")) parseMethodDef(current, c, name);
             else if(!current.equals("") && !current.startsWith("#")) throw new RuntimeException("illegal argument in: " + current);
             current = sc.nextLine().trim();
         }
 
         System.MEM.set(name, c);
-        System.MEM.set("§" + name, c.createObject());
-        System.MEM.set(name, new Variable(name, "§" + name, true));
+        if(pl == null){
+            System.MEM.set("§" + name, c.createObject());
+            System.MEM.set(name, new Variable(name, "§" + name, true));
+        }
     }
 
     private void parseMethodDef(java.util.Scanner sc, String current, Class c){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");
-        ParameterList pl = parseParameterList(th);
+        ParameterList pl = parseParameterList(th.getInBracket());
         if(pl == null) throw new RuntimeException("tried to define " + name + "() static");
         c.mem.set(name, new Method(pl, getContent(sc)));
     }
 
-    private void parseMethodDef(String current, Class c, String className){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+    private void parseMethodDef(String current, Class c, String classname){
+        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
         th.assertToken("native");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");
-        ParameterList pl = parseParameterList(th);
+        ParameterList pl = parseParameterList(th.getInBracket());
         if(pl == null) throw new RuntimeException("tried to define " + name + "() static");
-        c.mem.set(name, System.getNativeMethod(className, name, pl));
+        c.mem.set(name, System.getNativeMethod(classname, name, pl));
     }
 
-    private ParameterList parseParameterList(TokenHandler th){
-        if(th.current().s().equals("/")) return null;
+    private ParameterList parseParameterList(Tokenhandler th){
+        if(th.isEmpty()) return new ParameterList();
+        if(th.next().s().equals("/")) return null;
         ParameterList pl = new ParameterList();
-        String end = th.last().s().equals("(")?")":"]";
         Token t = th.current();
         Variable v;
-        while (!t.s().equals(end)){
+        while (th.hasNext()){
             if(!Set.of("var", "bool", "num", "str").contains(t.s())) throw new RuntimeException("illegal argument");
             v = new Variable(t.s().equals("var")?"":t.s());
-            th.next();
             t = th.assertToken(Token.Type.IDENTIFIER);
             pl.addParameter(t.s(), v);
-            t = th.next();
-            if(t.s().equals(end)) break;
-            if(!t.s().equals(",")) throw new RuntimeException("expected comma got " + t.s());
-            t = th.next();
+            if(th.hasNext()) th.assertToken(",");
         }
         return pl;
     }
@@ -134,7 +132,7 @@ public class Parser {
                 if(!line.equals("end")) throw new RuntimeException();
                 i--;
             }
-            if(i > 0) sb.append(line).append("\n");
+            if(i > 0 && !line.startsWith("#")) sb.append(line).append("\n");
         }
 
         if(i > 0) throw new RuntimeException("Method was not closed");

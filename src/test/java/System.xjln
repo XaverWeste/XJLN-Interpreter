@@ -1,0 +1,3 @@
+def $[/]
+    native log(var s)
+end
