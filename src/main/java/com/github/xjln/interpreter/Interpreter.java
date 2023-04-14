@@ -65,8 +65,13 @@ public class Interpreter {
                 String obj = executeClass(th, o, mem);
                 var = new Variable(Variable.getType(obj), obj, false);
             } else {
-                var = getVar(th.last().s(), o, mem);
-                if (var == null) var = new Variable();
+                if(th.current().t() == Token.Type.IDENTIFIER && th.last().t() == Token.Type.IDENTIFIER){
+                    if(getVar(th.next().s(), o, mem) != null) throw new RuntimeException("variable " + th.current().s() + " already exist");
+                    else var = new Variable(th.last().s().equals("var") ? "" : th.current().s(), "", th.current().s().equals("const"));
+                }else {
+                    var = getVar(th.current().s(), o, mem);
+                    if (var == null) var = new Variable();
+                }
             }
             if (var != null) {
                 if(!th.hasNext()) return var;
@@ -74,6 +79,9 @@ public class Interpreter {
                     th.next();
                     if (!var.value().startsWith("§")) throw new RuntimeException("object expected");
                     return executeNext(th, System.MEM.getO(var.value()), null);
+                } else if(th.current().s().equals("=")) {
+                    th.next();
+                    return executeNext(th, o, mem);
                 } else {
                     th.last();
                     return var;

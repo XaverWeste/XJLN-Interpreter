@@ -69,6 +69,8 @@ public class Parser {
         th.assertToken("[");
         ParameterList pl = parseParameterList(th.getInBracket());
         Class c = new Class(pl);
+        current = sc.nextLine().trim();
+
         while (!current.equals("end")){
             if(current.startsWith("def")) parseMethodDef(sc, current, c);
             else if(current.startsWith("native")) parseMethodDef(current, c, name);

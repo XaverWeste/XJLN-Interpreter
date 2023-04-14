@@ -1,15 +1,5 @@
 use System
 
 main
-    x = Test[2]
-    y = x:test(3)
-    $:log(y)
-end
-
-def Test[num x]
-
-    def test(num y)
-        result = x + y
-    end
 
 end

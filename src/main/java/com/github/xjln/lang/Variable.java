@@ -30,19 +30,19 @@ public class Variable{
     }
 
     public void set(Variable var){
-        if(!constant&&(type==null|| type.equals(var.type))){
+        if(!(constant && !value.equals("")) && (type==null || type.equals(var.type))){
             value=var.value;
         }
     }
 
     public void set(String val,String ty){
-        if(!constant&&(type.equals("")|| type.equals(ty))){
+        if(!(constant && !value.equals("")) && (type.equals("") || type.equals(ty))){
             value=val;
         }
     }
 
     public boolean canSet(String val){
-        if(constant) return false;
+        if(constant && !value.equals("")) return false;
         if(type.equals("")) return true;
         return getType(val).equals(type);
     }
