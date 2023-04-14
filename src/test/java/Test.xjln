@@ -1,5 +1,6 @@
 use System
 
 main
-
+    num x = 1
+    $:log(x)
 end
