@@ -55,7 +55,7 @@ public class Interpreter {
 
     private Variable executeNext(Tokenhandler th, Object o, Memory mem){
         Variable var;
-        if (th.hasNext()) {
+        if (th.hasNext() && th.current().t() == Token.Type.IDENTIFIER) {
             if (th.next().s().equals("(")) {
                 th.last();
                 executeMethod(th, o, mem);
@@ -68,14 +68,23 @@ public class Interpreter {
                 if(th.current().t() == Token.Type.IDENTIFIER){
                     if(th.last().t() == Token.Type.IDENTIFIER){
                         if(getVar(th.next().s(), o, mem) != null) throw new RuntimeException("variable " + th.current().s() + " already exist");
-                        else var = new Variable(th.last().s().equals("var") ? "" : th.current().s(), "", th.current().s().equals("const"));
+                        else{
+                            var = new Variable(th.last().s().equals("var") ? "" : th.current().s(), "", th.current().s().equals("const"));
+                            setVar(th.next().s(), var, o, mem);
+                        }
                     }else{
                         var = getVar(th.current().s(), o, mem);
-                        if (var == null) var = new Variable();
+                        if (var == null){
+                            var = new Variable();
+                            setVar(th.current().s(), var, o, mem);
+                        }
                     }
                 }else{
                     var = getVar(th.last().s(), o, mem);
-                    if (var == null) var = new Variable();
+                    if (var == null){
+                        var = new Variable();
+                        setVar(th.current().s(), var, o, mem);
+                    }
                 }
             }
             if (var != null) {
@@ -86,7 +95,8 @@ public class Interpreter {
                     return executeNext(th, System.MEM.getO(var.value()), null);
                 } else if(th.current().s().equals("=")) {
                     th.next();
-                    var.set(executeNext(th, o, mem));
+                    Variable v = executeNext(th, o, mem);
+                    var.set(v);
                     return var;
                 } else {
                     th.last();

@@ -30,15 +30,15 @@ public class Variable{
     }
 
     public void set(Variable var){
-        if(!(constant && !value.equals("")) && (type==null || type.equals(var.type))){
+        if(!(constant && !value.equals("")) && (type.equals("") || type.equals(var.type))){
             value=var.value;
-        }
+        } else throw new RuntimeException("illegal argument");
     }
 
     public void set(String val,String ty){
         if(!(constant && !value.equals("")) && (type.equals("") || type.equals(ty))){
             value=val;
-        }
+        } else throw new RuntimeException("illegal argument");
     }
 
     public boolean canSet(String val){
