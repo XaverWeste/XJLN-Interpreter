@@ -98,6 +98,7 @@ public class Interpreter {
     private Variable getVar(TokenHandler th, Object o, Memory mem){
         Variable var;
         if(th.hasNext()) {
+            if(th.current().s().equals("$")) th.next();
             if (th.current().s().equals("(")) {
                 executeMethod(th, o, mem);
                 var = System.MEM.get("result");
@@ -110,12 +111,9 @@ public class Interpreter {
             }
             if(var != null) {
                 if(!th.hasNext()) return var;
-                th.next();
                 if (!th.current().s().equals(":")){
-                    th.back();
                     return var;
-                }
-                else {
+                } else {
                     th.next();
                     th.next();
                     if (!var.value().startsWith("§")) throw new RuntimeException("object expected");

@@ -9,7 +9,7 @@ end
 def Test[num x]
 
     def test(num y)
-        result = x +y
+        result = x + y
     end
 
 end
