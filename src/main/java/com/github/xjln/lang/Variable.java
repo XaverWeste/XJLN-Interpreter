@@ -79,6 +79,6 @@ public class Variable{
         if(value.equals("")) return "";
         if(value.startsWith("§§§")) return "§";
         if(value.startsWith("§")) return value.substring(1).split("§")[0];
-        throw new RuntimeException("illegal argument");
+        throw new RuntimeException("illegal variable type");
     }
 }

@@ -18,7 +18,7 @@ public class Parser {
 
     public AST createAST(Tokenhandler th){
         AST.Operation ast = new AST.Operation();
-        ast.token = th.assertToken(Token.Type.NUMBER, Token.Type.BOOL, Token.Type.STRING, Token.Type.IDENTIFIER);
+        ast.token = th.next();
 
         AST.Operation last;
         Token op;

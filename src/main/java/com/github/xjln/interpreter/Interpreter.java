@@ -48,14 +48,20 @@ public class Interpreter {
     private Token executeStatement(Tokenhandler th, Object o, Memory mem){
         List<Token> tokens = new ArrayList<>();
 
-        while (th.hasNext()) tokens.add(th.next().t() == Token.Type.IDENTIFIER ? executeNext(th, o, mem).toToken() : th.current());
+        while (th.hasNext()) tokens.add((th.next().t() == Token.Type.IDENTIFIER || th.current().s().equals("(")) ? executeNext(th, o, mem).toToken() : th.current());
 
         return parser.createAST(new Tokenhandler(tokens)).execute(this);
     }
 
     private Variable executeNext(Tokenhandler th, Object o, Memory mem){
         Variable var;
-        if (th.hasNext() && th.current().t() == Token.Type.IDENTIFIER) {
+        if(th.current().s().equals("(")){
+            Tokenhandler tokenhandler = th.getInBracket();
+            Token t = executeStatement(tokenhandler, o, mem);
+            var = new Variable(Variable.getType(t.s()), t.s(), false);
+            return var;
+        }
+        if (th.hasNext() && th.isValid() && th.current().t() == Token.Type.IDENTIFIER) {
             if (th.next().s().equals("(")) {
                 th.last();
                 executeMethod(th, o, mem);
@@ -95,8 +101,7 @@ public class Interpreter {
                     return executeNext(th, System.MEM.getO(var.value()), null);
                 } else if(th.current().s().equals("=")) {
                     th.next();
-                    Variable v = executeNext(th, o, mem);
-                    var.set(v);
+                    var.set(executeNext(th, o, mem));
                     return var;
                 } else {
                     th.last();

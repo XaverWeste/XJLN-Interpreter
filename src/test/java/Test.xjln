@@ -2,5 +2,8 @@ use System
 
 main
     num x = 1
-    $:log(y = 1 + x)
+    $:log(x)
+    $:log(y = (1 + x = 2))
+    $:log(x)
+    $:log(y)
 end
