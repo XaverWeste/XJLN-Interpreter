@@ -65,6 +65,14 @@ public class Tokenhandler {
     }
 
     /**
+     * checks if the Tokenhandler contains Tokens
+     * @return is empty
+     */
+    public boolean isEmpty(){
+        return tokens.size() == 0;
+    }
+
+    /**
      * get the Tokens in Brackets
      * @return a new Tokenhandler with the tokens
      * @throws RuntimeException if current index isn't valid or there are no opening or closing brackets
