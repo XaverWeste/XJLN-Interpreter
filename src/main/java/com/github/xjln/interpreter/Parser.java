@@ -16,16 +16,16 @@ public class Parser {
         scanner = new Scanner();
     }
 
-    public AST createAST(TokenHandlerOld th){
+    public AST createAST(Tokenhandler th){
         AST.Operation ast = new AST.Operation();
-        ast.token = th.next();
+        ast.token = th.assertToken(Token.Type.NUMBER, Token.Type.BOOL, Token.Type.STRING, Token.Type.IDENTIFIER);
 
+        AST.Operation last;
         Token op;
 
-        while(th.hasNext()){
+        while (th.hasNext()){
             op = th.assertToken(Token.Type.OPERATOR);
-            if(!th.hasNext()) throw new RuntimeException("illegal argument");
-            AST.Operation last = ast;
+            last = ast;
             ast = new AST.Operation();
             ast.left = last;
             ast.token = op;
@@ -53,10 +53,10 @@ public class Parser {
         return sb.toString();
     }
 
-    private String parseFile(String current) throws FileNotFoundException { //TODO correct path
-        TokenHandlerOld th = new TokenHandlerOld(scanner.getTokens(current));
+    private String parseFile(String current) throws FileNotFoundException {
+        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
         th.assertToken("use");
-        if(!th.hasNext()) throw new RuntimeException("expected filename");
+        th.assertToken(Token.Type.IDENTIFIER);
         File file = new File("src/test/java/" + current.split(" ")[1] + ".xjln");
         if(!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
         return parseFile(file);

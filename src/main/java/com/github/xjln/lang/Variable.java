@@ -77,6 +77,7 @@ public class Variable{
         if(value.matches("^[0-9.]+$")) return "num";
         if(value.equals("true")||value.equals("false")) return "bool";
         if(value.equals("")) return "";
+        if(value.startsWith("§§§")) return "§";
         if(value.startsWith("§")) return value.substring(1).split("§")[0];
         throw new RuntimeException("illegal argument");
     }
