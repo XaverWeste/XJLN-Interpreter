@@ -132,7 +132,6 @@ public class Interpreter {
         } else {
             ParameterList pl = m.getPl(paras);
             mem = pl.createMem(paras);
-
             for (String l : m.getCode(pl).split("\n")) execute(l, o, mem);
         }
     }
@@ -226,6 +225,22 @@ public class Interpreter {
                     switch (operator.s()){
                         case "==" -> { return new Token(String.valueOf(left.s().equals(right.s())), Token.Type.BOOL); }
                         case "!=" -> { return new Token(String.valueOf(!left.s().equals(right.s())), Token.Type.BOOL); }
+                    }
+                }
+            }
+            case IDENTIFIER -> {
+                Object o = System.MEM.getO(left.s());
+                if(o == null) throw new RuntimeException("object " + left.s() + " does not exist");
+                Method m = o.clas.mem.getM(operator.s());
+                if(m != null){
+                    String[] paras = new String[]{left.s(), right.s()};
+                    ParameterList pl = m.getPl(paras);
+                    if(pl != null){
+                        String result = System.MEM.get("result").value();
+                        Memory mem = pl.createMem(paras);
+                        for (String l : m.getCode(pl).split("\n")) execute(l, o, mem);
+                        if(System.MEM.get("result").value().equals(result)) throw new RuntimeException("expected result");
+                        return System.MEM.get("result").toToken();
                     }
                 }
             }

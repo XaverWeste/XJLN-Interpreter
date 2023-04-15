@@ -25,6 +25,10 @@ public sealed class Memory permits Memory.SystemMemory, Memory.ClassMemory {
             return objects.get(name);
         }
 
+        public boolean existO(String name){
+            return objects.containsKey(name);
+        }
+
         public void set(String name,Class c){
             classes.put(name,c);
         }

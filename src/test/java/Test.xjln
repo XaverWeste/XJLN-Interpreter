@@ -1,16 +1,16 @@
 use System
 
 main
-    Test:test(1)
-    Test:test("true")
+    var a = Test[3]
+    var b = Test[1]
+    $:log(a)
+    $:log(b)
+    var c = a + a
+    $:log(c:x)
 end
 
-def Test[/]
-    def test(str s)
-        $:log("str")
-    end
-
-    def test(num n)
-        $:log("num")
+def Test[num x]
+    def +(var t1, var t2)
+        result = Test[t1:x + t2:x]
     end
 end

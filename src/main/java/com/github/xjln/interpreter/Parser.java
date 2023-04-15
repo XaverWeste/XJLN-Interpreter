@@ -88,7 +88,7 @@ public class Parser {
     private void parseMethodDef(java.util.Scanner sc, String current, Class c){
         Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
         th.assertToken("def");
-        String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        String name = th.assertToken(Token.Type.IDENTIFIER, Token.Type.OPERATOR).s();
         th.assertToken("(");
         ParameterList pl = parseParameterList(th.getInBracket());
         if(pl == null) throw new RuntimeException("tried to define " + name + "() as static");
@@ -117,11 +117,14 @@ public class Parser {
         Token t = th.current();
         Variable v;
         while (th.hasNext()){
-            if(!Set.of("var", "bool", "num", "str").contains(t.s())) throw new RuntimeException("illegal argument");
+            if(!Set.of("var", "bool", "num", "str", "const").contains(t.s())) throw new RuntimeException("illegal argument");
             v = new Variable(t.s().equals("var") || t.s().equals("const") ?"":t.s());
             t = th.assertToken(Token.Type.IDENTIFIER);
             pl.addParameter(t.s(), v);
-            if(th.hasNext()) th.assertToken(",");
+            if(th.hasNext()){
+                th.assertToken(",");
+                t = th.next();
+            }
         }
         return pl;
     }
