@@ -12,6 +12,6 @@ public class Class {
     }
 
     public Object createObject(){
-        return new Object(mem.copy(), this); //TODO
+        return new Object(mem.copy(), this);
     }
 }

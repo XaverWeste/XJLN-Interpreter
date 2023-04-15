@@ -12,7 +12,7 @@ public class System {
         StringBuilder sb = new StringBuilder();
         sb.append("§").append(className).append("§");
         int i = 0;
-        while(MEM.exist(sb.toString() + i)) i++;
+        while(MEM.existO(sb.toString() + i)) i++;
         sb.append(i);
         return sb.toString();
     }

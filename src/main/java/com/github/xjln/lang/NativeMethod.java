@@ -9,9 +9,10 @@ public class NativeMethod extends Method{
     }
 
     public final Code code;
+    public final ParameterList pl;
 
     public NativeMethod(ParameterList pl, Code code) {
-        super(pl, "");
+        this.pl = pl;
         this.code = code;
     }
 }

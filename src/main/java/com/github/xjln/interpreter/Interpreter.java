@@ -55,14 +55,12 @@ public class Interpreter {
 
     private Variable executeNext(Tokenhandler th, Object o, Memory mem){
         Variable var;
-        if(th.current().s().equals("(")){
-            Tokenhandler tokenhandler = th.getInBracket();
-            Token t = executeStatement(tokenhandler, o, mem);
-            var = new Variable(Variable.getType(t.s()), t.s(), false);
-            return var;
-        }
-        if (th.hasNext() && th.isValid() && th.current().t() == Token.Type.IDENTIFIER) {
-            if (th.next().s().equals("(")) {
+        if (th.hasNext() && th.isValid() && (th.current().t() == Token.Type.IDENTIFIER || th.current().s().equals("("))) {
+            if(th.current().s().equals("(")){
+                Tokenhandler tokenhandler = th.getInBracket();
+                Token t = executeStatement(tokenhandler, o, mem);
+                var = new Variable(Variable.getType(t.s()), t.s(), false);
+            }else if (th.next().s().equals("(")) {
                 th.last();
                 executeMethod(th, o, mem);
                 var = System.MEM.get("result");
@@ -75,7 +73,7 @@ public class Interpreter {
                     if(th.last().t() == Token.Type.IDENTIFIER){
                         if(getVar(th.next().s(), o, mem) != null) throw new RuntimeException("variable " + th.current().s() + " already exist");
                         else{
-                            var = new Variable(th.last().s().equals("var") ? "" : th.current().s(), "", th.current().s().equals("const"));
+                            var = new Variable(th.last().s().equals("var") ||th.current().s().equals("const") ? "" : th.current().s(), "", th.current().s().equals("const"));
                             setVar(th.next().s(), var, o, mem);
                         }
                     }else{
@@ -100,8 +98,10 @@ public class Interpreter {
                     if (!var.value().startsWith("§")) throw new RuntimeException("object expected");
                     return executeNext(th, System.MEM.getO(var.value()), null);
                 } else if(th.current().s().equals("=")) {
-                    th.next();
-                    var.set(executeNext(th, o, mem));
+                    //th.next();
+                    //var.set(executeNext(th, o, mem));
+                    Token t = executeStatement(th, o, mem);
+                    var.set(t.s(), Variable.getType(t.s()));
                     return var;
                 } else {
                     th.last();
@@ -125,11 +125,15 @@ public class Interpreter {
         Method m = o.clas.mem.getM(name);
         if (m == null) throw new RuntimeException("method didn't exist");
 
-        if (!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
-        mem = m.pl.createMem(paras);
-
-        if(m instanceof NativeMethod) ((NativeMethod)m).code.execute(o, mem);
-        else for (String l : m.code.split("\n")) execute(l, o, mem);
+        if(m instanceof NativeMethod){
+            if(!((NativeMethod) m).pl.matches(paras)) throw new RuntimeException("illegal argument");
+            mem = ((NativeMethod) m).pl.createMem(paras);
+            ((NativeMethod)m).code.execute(o, mem);
+        } else {
+            ParameterList pl = m.getPl(paras);
+            mem = pl.createMem(paras);
+            for (String l : m.getCode(pl).split("\n")) execute(l, o, mem);
+        }
     }
 
     private String executeClass(Tokenhandler th, Object o, Memory mem){
@@ -221,6 +225,22 @@ public class Interpreter {
                     switch (operator.s()){
                         case "==" -> { return new Token(String.valueOf(left.s().equals(right.s())), Token.Type.BOOL); }
                         case "!=" -> { return new Token(String.valueOf(!left.s().equals(right.s())), Token.Type.BOOL); }
+                    }
+                }
+            }
+            case IDENTIFIER -> {
+                Object o = System.MEM.getO(left.s());
+                if(o == null) throw new RuntimeException("object " + left.s() + " does not exist");
+                Method m = o.clas.mem.getM(operator.s());
+                if(m != null){
+                    String[] paras = new String[]{left.s(), right.s()};
+                    ParameterList pl = m.getPl(paras);
+                    if(pl != null){
+                        String result = System.MEM.get("result").value();
+                        Memory mem = pl.createMem(paras);
+                        for (String l : m.getCode(pl).split("\n")) execute(l, o, mem);
+                        if(System.MEM.get("result").value().equals(result)) throw new RuntimeException("expected result");
+                        return System.MEM.get("result").toToken();
                     }
                 }
             }

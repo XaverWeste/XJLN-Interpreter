@@ -47,7 +47,7 @@ public class Parser {
             if(line.equals("main")) sb.append(getContent(sc));
             else if(line.startsWith("def")) parseClassDef(sc, line);
             else if(line.startsWith("use")) sb.append(parseFile(line));
-            else if(!line.equals("")) throw new RuntimeException("illegal argument in \"" + line +"\"");
+            else if(!line.equals("") && !line.startsWith("#")) throw new RuntimeException("illegal argument in \"" + line +"\"");
         }
 
         return sb.toString();
@@ -88,11 +88,16 @@ public class Parser {
     private void parseMethodDef(java.util.Scanner sc, String current, Class c){
         Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
         th.assertToken("def");
-        String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        String name = th.assertToken(Token.Type.IDENTIFIER, Token.Type.OPERATOR).s();
         th.assertToken("(");
         ParameterList pl = parseParameterList(th.getInBracket());
-        if(pl == null) throw new RuntimeException("tried to define " + name + "() static");
-        c.mem.set(name, new Method(pl, getContent(sc)));
+        if(pl == null) throw new RuntimeException("tried to define " + name + "() as static");
+        Method m = c.mem.getM(name);
+        if(m == null){
+            m = new Method();
+            c.mem.set(name, m);
+        }
+        m.add(pl, getContent(sc));
     }
 
     private void parseMethodDef(String current, Class c, String classname){
@@ -101,7 +106,7 @@ public class Parser {
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");
         ParameterList pl = parseParameterList(th.getInBracket());
-        if(pl == null) throw new RuntimeException("tried to define " + name + "() static");
+        if(pl == null) throw new RuntimeException("tried to define " + name + "() as static");
         c.mem.set(name, System.getNativeMethod(classname, name, pl));
     }
 
@@ -112,11 +117,14 @@ public class Parser {
         Token t = th.current();
         Variable v;
         while (th.hasNext()){
-            if(!Set.of("var", "bool", "num", "str").contains(t.s())) throw new RuntimeException("illegal argument");
-            v = new Variable(t.s().equals("var")?"":t.s());
+            if(!Set.of("var", "bool", "num", "str", "const").contains(t.s())) throw new RuntimeException("illegal argument");
+            v = new Variable(t.s().equals("var") || t.s().equals("const") ?"":t.s());
             t = th.assertToken(Token.Type.IDENTIFIER);
             pl.addParameter(t.s(), v);
-            if(th.hasNext()) th.assertToken(",");
+            if(th.hasNext()){
+                th.assertToken(",");
+                t = th.next();
+            }
         }
         return pl;
     }

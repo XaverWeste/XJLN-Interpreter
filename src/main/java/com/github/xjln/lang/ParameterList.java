@@ -27,14 +27,13 @@ public class ParameterList {
 
     public Memory createMem(String...vars){
         Memory mem = new Memory();
-        Variable var;
-
-        for(int i = 0;i < vars.length; i++){
-            var = parameters.get(i).var;
-            var.set(vars[i], Variable.getType(vars[i]));
-            mem.set(parameters.get(i).name, var);
-        }
-
+        for(int i = 0;i < vars.length; i++) mem.set(parameters.get(i).name, new Variable(Variable.getType(vars[i]), vars[i], parameters.get(i).var.constant()));
         return mem;
+    }
+
+    public boolean equals(ParameterList pl){
+        if(pl.parameters.size() != parameters.size()) return false;
+        for(int i = 0;i < parameters.size();i++) if(!parameters.get(i).var.type().equals(pl.parameters.get(i).var.type())) return false;
+        return true;
     }
 }
