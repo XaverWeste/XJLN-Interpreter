@@ -2,11 +2,10 @@ use System
 
 main
     var a = Test[3]
+    $:log(a:x)
     var b = Test[1]
-    $:log(a)
-    $:log(b)
-    var c = a + a
-    $:log(c:x)
+    $:log(a:x)
+    $:log(b:x)
 end
 
 def Test[num x]

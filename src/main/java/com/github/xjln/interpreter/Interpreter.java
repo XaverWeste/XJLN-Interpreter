@@ -55,14 +55,12 @@ public class Interpreter {
 
     private Variable executeNext(Tokenhandler th, Object o, Memory mem){
         Variable var;
-        if(th.current().s().equals("(")){
-            Tokenhandler tokenhandler = th.getInBracket();
-            Token t = executeStatement(tokenhandler, o, mem);
-            var = new Variable(Variable.getType(t.s()), t.s(), false);
-            return var;
-        }
-        if (th.hasNext() && th.isValid() && th.current().t() == Token.Type.IDENTIFIER) {
-            if (th.next().s().equals("(")) {
+        if (th.hasNext() && th.isValid() && (th.current().t() == Token.Type.IDENTIFIER || th.current().s().equals("("))) {
+            if(th.current().s().equals("(")){
+                Tokenhandler tokenhandler = th.getInBracket();
+                Token t = executeStatement(tokenhandler, o, mem);
+                var = new Variable(Variable.getType(t.s()), t.s(), false);
+            }else if (th.next().s().equals("(")) {
                 th.last();
                 executeMethod(th, o, mem);
                 var = System.MEM.get("result");
