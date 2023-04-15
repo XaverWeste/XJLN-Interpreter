@@ -98,8 +98,6 @@ public class Interpreter {
                     if (!var.value().startsWith("§")) throw new RuntimeException("object expected");
                     return executeNext(th, System.MEM.getO(var.value()), null);
                 } else if(th.current().s().equals("=")) {
-                    //th.next();
-                    //var.set(executeNext(th, o, mem));
                     Token t = executeStatement(th, o, mem);
                     var.set(t.s(), Variable.getType(t.s()));
                     return var;
