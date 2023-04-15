@@ -73,6 +73,13 @@ public class Tokenhandler {
     }
 
     /**
+     * sets the index to -1
+     */
+    public void toFirst(){
+        index = -1;
+    }
+
+    /**
      * get the Tokens in Brackets
      * @return a new Tokenhandler with the tokens
      * @throws RuntimeException if current index isn't valid or there are no opening or closing brackets

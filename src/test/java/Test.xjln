@@ -1,11 +1,9 @@
 use System
 
 main
-    $:log(c = (Test[1]+Test[3]):x)
-end
-
-def Test[num x]
-    def +(var t1, var t2)
-        result = Test[t1:x + t2:x]
+    num n = 0
+    while n < 10
+        $:log(n)
+        n = n + 1
     end
 end

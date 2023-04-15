@@ -132,18 +132,27 @@ public class Parser {
     private String getContent(java.util.Scanner sc){
         StringBuilder sb = new StringBuilder();
         String line;
-        int i = 1;
+        boolean breaked = false;
 
-        while(sc.hasNextLine() && i > 0){
+        while(sc.hasNextLine()){
             line = sc.nextLine().trim();
-            if(line.startsWith("end")){
-                if(!line.equals("end")) throw new RuntimeException();
-                i--;
+            if(line.equals("end")){
+                breaked = true;
+                break;
             }
-            if(i > 0 && !line.startsWith("#")) sb.append(line).append("\n");
+
+            if(line.startsWith("if") && line.split(" ")[0].equals("if")){
+                sb.append(line);
+                String content = getContent(sc);
+                for(String s:content.split("\n")) sb.append("~").append(s);
+            }else if(line.startsWith("while") && line.split(" ")[0].equals("while")){
+                sb.append(line);
+                String content = getContent(sc);
+                for(String s:content.split("\n")) sb.append("~").append(s);
+            }else if(!line.startsWith("#")) sb.append(line).append("\n");
         }
 
-        if(i > 0) throw new RuntimeException("Method was not closed");
+        if(!breaked) throw new RuntimeException("Method was not closed");
 
         return sb.toString();
     }
