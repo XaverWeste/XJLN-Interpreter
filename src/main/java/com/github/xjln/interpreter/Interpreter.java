@@ -75,7 +75,7 @@ public class Interpreter {
                     if(th.last().t() == Token.Type.IDENTIFIER){
                         if(getVar(th.next().s(), o, mem) != null) throw new RuntimeException("variable " + th.current().s() + " already exist");
                         else{
-                            var = new Variable(th.last().s().equals("var") ? "" : th.current().s(), "", th.current().s().equals("const"));
+                            var = new Variable(th.last().s().equals("var") ||th.current().s().equals("const") ? "" : th.current().s(), "", th.current().s().equals("const"));
                             setVar(th.next().s(), var, o, mem);
                         }
                     }else{

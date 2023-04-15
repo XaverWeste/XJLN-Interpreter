@@ -32,13 +32,19 @@ public class Variable{
     public void set(Variable var){
         if(!(constant && !value.equals("")) && (type.equals("") || type.equals(var.type))){
             value=var.value;
-        } else throw new RuntimeException("illegal argument");
+        } else {
+            if(constant) throw new RuntimeException("variable is constant");
+            throw new RuntimeException("expected " + type + " got " + var.type);
+        }
     }
 
     public void set(String val,String ty){
         if(!(constant && !value.equals("")) && (type.equals("") || type.equals(ty))){
             value=val;
-        } else throw new RuntimeException("illegal argument");
+        } else {
+            if(constant) throw new RuntimeException("variable is constant");
+            throw new RuntimeException("expected " + type + " got " + ty);
+        }
     }
 
     public boolean canSet(String val){

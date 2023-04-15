@@ -113,7 +113,7 @@ public class Parser {
         Variable v;
         while (th.hasNext()){
             if(!Set.of("var", "bool", "num", "str").contains(t.s())) throw new RuntimeException("illegal argument");
-            v = new Variable(t.s().equals("var")?"":t.s());
+            v = new Variable(t.s().equals("var") || t.s().equals("const") ?"":t.s());
             t = th.assertToken(Token.Type.IDENTIFIER);
             pl.addParameter(t.s(), v);
             if(th.hasNext()) th.assertToken(",");
