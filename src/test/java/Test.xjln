@@ -1,11 +1,7 @@
 use System
 
 main
-    var a = Test[3]
-    $:log(a:x)
-    var b = Test[1]
-    $:log(a:x)
-    $:log(b:x)
+    $:log(c = (Test[1]+Test[3]):x)
 end
 
 def Test[num x]
