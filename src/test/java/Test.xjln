@@ -1,10 +1,16 @@
 use System
 
 main
-    const x
-    x = 1
-    $:log(x)
-    $:log(y = (1 + x ))
-    $:log(x)
-    $:log(y)
+    Test:test(1)
+    Test:test("true")
+end
+
+def Test[/]
+    def test(str s)
+        $:log("str")
+    end
+
+    def test(num n)
+        $:log("num")
+    end
 end

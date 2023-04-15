@@ -37,4 +37,10 @@ public class ParameterList {
 
         return mem;
     }
+
+    public boolean equals(ParameterList pl){
+        if(pl.parameters.size() != parameters.size()) return false;
+        for(int i = 0;i < parameters.size();i++) if(!parameters.get(i).var.type().equals(pl.parameters.get(i).var.type())) return false;
+        return true;
+    }
 }

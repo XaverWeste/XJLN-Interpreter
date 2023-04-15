@@ -125,11 +125,16 @@ public class Interpreter {
         Method m = o.clas.mem.getM(name);
         if (m == null) throw new RuntimeException("method didn't exist");
 
-        if (!m.pl.matches(paras)) throw new RuntimeException("illegal argument");
-        mem = m.pl.createMem(paras);
+        if(m instanceof NativeMethod){
+            if(!((NativeMethod) m).pl.matches(paras)) throw new RuntimeException("illegal argument");
+            mem = ((NativeMethod) m).pl.createMem(paras);
+            ((NativeMethod)m).code.execute(o, mem);
+        } else {
+            ParameterList pl = m.getPl(paras);
+            mem = pl.createMem(paras);
 
-        if(m instanceof NativeMethod) ((NativeMethod)m).code.execute(o, mem);
-        else for (String l : m.code.split("\n")) execute(l, o, mem);
+            for (String l : m.getCode(pl).split("\n")) execute(l, o, mem);
+        }
     }
 
     private String executeClass(Tokenhandler th, Object o, Memory mem){
