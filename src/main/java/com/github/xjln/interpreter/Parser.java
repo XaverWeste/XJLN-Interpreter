@@ -11,6 +11,7 @@ import java.util.Set;
 public class Parser {
 
     public final Scanner scanner;
+    public static final String LIBPATH = "src/test/java";
 
     public Parser(){
         scanner = new Scanner();
@@ -46,19 +47,19 @@ public class Parser {
             line = sc.nextLine().trim();
             if(line.equals("main")) sb.append(getContent(sc));
             else if(line.startsWith("def")) parseClassDef(sc, line);
-            else if(line.startsWith("use")) sb.append(parseFile(line));
+            else if(line.startsWith("use")) sb.append(parseFile(line, file));
             else if(!line.equals("") && !line.startsWith("#")) throw new RuntimeException("illegal argument in \"" + line +"\"");
         }
 
         return sb.toString();
     }
 
-    private String parseFile(String current) throws FileNotFoundException {
-        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
+    private String parseFile(String line, File current) throws FileNotFoundException {
+        Tokenhandler th = new Tokenhandler(scanner.getTokens(line));
         th.assertToken("use");
         th.assertToken(Token.Type.IDENTIFIER);
-        File file = new File("src/test/java/" + current.split(" ")[1] + ".xjln");
-        if(!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
+        File file = new File(line.substring(4).startsWith("lib/") ? LIBPATH + line.substring(7) + ".xjln" : line.substring(4).startsWith("src") ? line.split(" ")[1] + ".xjln" : current.getPath().substring(0, current.getPath().length() - current.getName().length()) + line.split(" ")[1] + ".xjln");
+        if (!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
         return parseFile(file);
     }
 

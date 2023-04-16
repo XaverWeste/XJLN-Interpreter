@@ -1,4 +1,4 @@
-use System
+use lib/System
 
 main
     num n = 3
