@@ -11,6 +11,7 @@ import java.util.Set;
 public class Parser {
 
     public final Scanner scanner;
+    public static final String LIBPATH = "src/test/java";
 
     public Parser(){
         scanner = new Scanner();
@@ -46,19 +47,19 @@ public class Parser {
             line = sc.nextLine().trim();
             if(line.equals("main")) sb.append(getContent(sc));
             else if(line.startsWith("def")) parseClassDef(sc, line);
-            else if(line.startsWith("use")) sb.append(parseFile(line));
+            else if(line.startsWith("use")) sb.append(parseFile(line, file));
             else if(!line.equals("") && !line.startsWith("#")) throw new RuntimeException("illegal argument in \"" + line +"\"");
         }
 
         return sb.toString();
     }
 
-    private String parseFile(String current) throws FileNotFoundException {
-        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
+    private String parseFile(String line, File current) throws FileNotFoundException {
+        Tokenhandler th = new Tokenhandler(scanner.getTokens(line));
         th.assertToken("use");
         th.assertToken(Token.Type.IDENTIFIER);
-        File file = new File("src/test/java/" + current.split(" ")[1] + ".xjln");
-        if(!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
+        File file = new File(line.substring(4).startsWith("lib/") ? LIBPATH + line.substring(7) + ".xjln" : line.substring(4).startsWith("src") ? line.split(" ")[1] + ".xjln" : current.getPath().substring(0, current.getPath().length() - current.getName().length()) + line.split(" ")[1] + ".xjln");
+        if (!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
         return parseFile(file);
     }
 
@@ -132,18 +133,34 @@ public class Parser {
     private String getContent(java.util.Scanner sc){
         StringBuilder sb = new StringBuilder();
         String line;
-        int i = 1;
+        boolean breaked = false;
 
-        while(sc.hasNextLine() && i > 0){
+        while(sc.hasNextLine()){
             line = sc.nextLine().trim();
-            if(line.startsWith("end")){
-                if(!line.equals("end")) throw new RuntimeException();
-                i--;
+            if(line.equals("end")){
+                breaked = true;
+                break;
             }
-            if(i > 0 && !line.startsWith("#")) sb.append(line).append("\n");
+
+            if(line.startsWith("if") && line.split(" ")[0].equals("if")){
+                sb.append(line);
+                String content = getContent(sc);
+                String[] cases = content.split("else");
+                for(String s:cases[0].split("\n")) sb.append("#").append(s);
+                for(int i = 1;i < cases.length;i++){
+                    sb.append("##else");
+                    for(String s:cases[i].split("\n")) if(!s.equals("")) sb.append(sb.toString().endsWith("else") && s.trim().startsWith("if")?"":"#").append(s);
+                }
+                sb.append("\n");
+            }else if(line.startsWith("while") && line.split(" ")[0].equals("while")){
+                sb.append(line);
+                String content = getContent(sc);
+                for(String s:content.split("\n")) sb.append("#").append(s);
+                sb.append("\n");
+            }else if(!line.startsWith("#")) sb.append(line).append("\n");
         }
 
-        if(i > 0) throw new RuntimeException("Method was not closed");
+        if(!breaked) throw new RuntimeException("end expected");
 
         return sb.toString();
     }

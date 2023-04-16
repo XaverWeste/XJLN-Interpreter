@@ -1,11 +1,12 @@
-use System
+use lib/System
 
 main
-    $:log(c = (Test[1]+Test[3]):x)
-end
-
-def Test[num x]
-    def +(var t1, var t2)
-        result = Test[t1:x + t2:x]
+    num n = 3
+    if n == 0
+        $:log("=0")
+    else if n == 1
+        $:log("=1")
+    else
+        $:log(">1")
     end
 end

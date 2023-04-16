@@ -41,7 +41,48 @@ public class Interpreter {
         line = line.trim();
         if(!line.equals("")){
             Tokenhandler th = new Tokenhandler(parser.scanner.getTokens(line));
-            executeStatement(th, o, mem);
+            if(th.next().s().equals("if")){
+                String[] cases = line.split("##");
+                String[] lines = cases[0].split("#");
+                th = new Tokenhandler(parser.scanner.getTokens(lines[0]));
+                th.assertToken("if");
+                Token t = executeStatement(th, o, mem);
+                Tokenhandler.assertToken(t, Token.Type.BOOL);
+                if (t.s().equals("true")) for (int j = 1; j < lines.length; j++) execute(lines[j], o, mem);
+                else{
+                    for(int i = 1;i < cases.length;i++){
+                        lines = cases[i].split("#");
+                        th = new Tokenhandler(parser.scanner.getTokens(lines[0]));
+                        th.assertToken("else");
+                        t = new Token("true", Token.Type.BOOL);
+                        if(th.hasNext()) {
+                            th.assertToken("if");
+                            t = executeStatement(th, o, mem);
+                            Tokenhandler.assertToken(t, Token.Type.BOOL);
+                        }
+                        if (t.s().equals("true")){
+                            for (int j = 1; j < lines.length; j++)
+                                execute(lines[j], o, mem);
+                            break;
+                        }
+                    }
+                }
+            }else if(th.current().s().equals("while")){
+                String[] lines = line.split("#");
+                th = new Tokenhandler(parser.scanner.getTokens(lines[0]));
+                th.next();
+                Token t = executeStatement(th, o, mem);
+                Tokenhandler.assertToken(t, Token.Type.BOOL);
+                while(t.s().equals("true")){
+                    for(int i = 1;i < lines.length;i++) execute(lines[i], o, mem);
+                    th.toFirst();
+                    th.next();
+                    t = executeStatement(th, o, mem);
+                }
+            }else{
+                th.toFirst();
+                executeStatement(th, o, mem);
+            }
         }
     }
 
@@ -200,6 +241,8 @@ public class Interpreter {
                     case "%" -> { return new Token(String.valueOf(first % second), Token.Type.NUMBER); }
                     case "==" -> { return new Token(String.valueOf(first == second), Token.Type.BOOL); }
                     case "!=" -> { return new Token(String.valueOf(first != second), Token.Type.BOOL); }
+                    case "<" -> { return new Token(String.valueOf(first < second), Token.Type.BOOL); }
+                    case ">" -> { return new Token(String.valueOf(first > second), Token.Type.BOOL); }
                 }
             }
             case BOOL -> {
