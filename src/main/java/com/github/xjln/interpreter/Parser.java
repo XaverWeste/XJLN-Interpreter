@@ -144,15 +144,22 @@ public class Parser {
             if(line.startsWith("if") && line.split(" ")[0].equals("if")){
                 sb.append(line);
                 String content = getContent(sc);
-                for(String s:content.split("\n")) sb.append("~").append(s);
+                String[] cases = content.split("else");
+                for(String s:cases[0].split("\n")) sb.append("#").append(s);
+                for(int i = 1;i < cases.length;i++){
+                    sb.append("##else");
+                    for(String s:cases[i].split("\n")) if(!s.equals("")) sb.append(sb.toString().endsWith("else") && s.trim().startsWith("if")?"":"#").append(s);
+                }
+                sb.append("\n");
             }else if(line.startsWith("while") && line.split(" ")[0].equals("while")){
                 sb.append(line);
                 String content = getContent(sc);
-                for(String s:content.split("\n")) sb.append("~").append(s);
+                for(String s:content.split("\n")) sb.append("#").append(s);
+                sb.append("\n");
             }else if(!line.startsWith("#")) sb.append(line).append("\n");
         }
 
-        if(!breaked) throw new RuntimeException("Method was not closed");
+        if(!breaked) throw new RuntimeException("end expected");
 
         return sb.toString();
     }
