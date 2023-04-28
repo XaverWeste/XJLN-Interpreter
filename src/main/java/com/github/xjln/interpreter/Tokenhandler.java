@@ -153,7 +153,7 @@ public class Tokenhandler {
      * @throws RuntimeException if it hasn't next Token or next Token hasn't one the given types
      */
     public Token assertToken(@NotNull Token.Type...types) throws RuntimeException {
-        if(!hasNext()) throw new RuntimeException("expected one of " + arrayToString(types) + " got nothing"); //TODO
+        if(!hasNext()) throw new RuntimeException("expected one of " + arrayToString(types) + " got nothing");
         Token token = next();
 
         for(Token.Type t:types) if(token.t() == t) return token;

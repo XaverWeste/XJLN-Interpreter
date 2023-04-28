@@ -21,7 +21,7 @@ public class System {
         return switch (className){
             case "$" -> switch (methodName){
                 case "log" -> new NativeMethod(pl, (o, mem) -> java.lang.System.out.println(mem.vars.get("s").value()));
-                default -> throw new RuntimeException();
+                default -> throw new RuntimeException("for $ class is no native method " + methodName + "() defined");
             };
             default -> throw new RuntimeException("for class " + className + " is no native method " + methodName + "() defined");
         };
