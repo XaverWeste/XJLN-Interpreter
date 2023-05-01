@@ -11,13 +11,13 @@ import java.util.Set;
 public class Parser {
 
     public final Scanner scanner;
-    public static final String LIBPATH = "src/test/java";
+    public static final String LIBPATH = "src/main/java/com/github/xjln/";
 
     public Parser(){
         scanner = new Scanner();
     }
 
-    public AST createAST(Tokenhandler th){
+    public AST createAST(TokenHandler th){
         AST.Operation ast = new AST.Operation();
         ast.token = th.next();
 
@@ -55,16 +55,16 @@ public class Parser {
     }
 
     private String parseFile(String line, File current) throws FileNotFoundException {
-        Tokenhandler th = new Tokenhandler(scanner.getTokens(line));
+        TokenHandler th = new TokenHandler(scanner.getTokens(line));
         th.assertToken("use");
         th.assertToken(Token.Type.IDENTIFIER);
-        File file = new File(line.substring(4).startsWith("lib/") ? LIBPATH + line.substring(7) + ".xjln" : line.substring(4).startsWith("src") ? line.split(" ")[1] + ".xjln" : current.getPath().substring(0, current.getPath().length() - current.getName().length()) + line.split(" ")[1] + ".xjln");
+        File file = new File(line.substring(4).startsWith("lib/") ? LIBPATH + line.substring(4) + ".xjln" : line.substring(4).startsWith("src") ? line.split(" ")[1] + ".xjln" : current.getPath().substring(0, current.getPath().length() - current.getName().length()) + line.split(" ")[1] + ".xjln");
         if (!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
         return parseFile(file);
     }
 
     private void parseClassDef(java.util.Scanner sc, String current){
-        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
+        TokenHandler th = new TokenHandler(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("[");
@@ -87,7 +87,7 @@ public class Parser {
     }
 
     private void parseMethodDef(java.util.Scanner sc, String current, Class c){
-        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
+        TokenHandler th = new TokenHandler(scanner.getTokens(current));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER, Token.Type.OPERATOR).s();
         th.assertToken("(");
@@ -102,7 +102,7 @@ public class Parser {
     }
 
     private void parseMethodDef(String current, Class c, String classname){
-        Tokenhandler th = new Tokenhandler(scanner.getTokens(current));
+        TokenHandler th = new TokenHandler(scanner.getTokens(current));
         th.assertToken("native");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
         th.assertToken("(");
@@ -111,7 +111,7 @@ public class Parser {
         c.mem.set(name, System.getNativeMethod(classname, name, pl));
     }
 
-    private ParameterList parseParameterList(Tokenhandler th){
+    private ParameterList parseParameterList(TokenHandler th){
         if(th.isEmpty()) return new ParameterList();
         if(th.next().s().equals("/")) return null;
         ParameterList pl = new ParameterList();

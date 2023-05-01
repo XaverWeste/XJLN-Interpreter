@@ -40,25 +40,25 @@ public class Interpreter {
     private void execute(String line, Object o, Memory mem){
         line = line.trim();
         if(!line.equals("")){
-            Tokenhandler th = new Tokenhandler(parser.scanner.getTokens(line));
+            TokenHandler th = new TokenHandler(parser.scanner.getTokens(line));
             if(th.next().s().equals("if")){
                 String[] cases = line.split("##");
                 String[] lines = cases[0].split("#");
-                th = new Tokenhandler(parser.scanner.getTokens(lines[0]));
+                th = new TokenHandler(parser.scanner.getTokens(lines[0]));
                 th.assertToken("if");
                 Token t = executeStatement(th, o, mem);
-                Tokenhandler.assertToken(t, Token.Type.BOOL);
+                TokenHandler.assertToken(t, Token.Type.BOOL);
                 if (t.s().equals("true")) for (int j = 1; j < lines.length; j++) execute(lines[j], o, mem);
                 else{
                     for(int i = 1;i < cases.length;i++){
                         lines = cases[i].split("#");
-                        th = new Tokenhandler(parser.scanner.getTokens(lines[0]));
+                        th = new TokenHandler(parser.scanner.getTokens(lines[0]));
                         th.assertToken("else");
                         t = new Token("true", Token.Type.BOOL);
                         if(th.hasNext()) {
                             th.assertToken("if");
                             t = executeStatement(th, o, mem);
-                            Tokenhandler.assertToken(t, Token.Type.BOOL);
+                            TokenHandler.assertToken(t, Token.Type.BOOL);
                         }
                         if (t.s().equals("true")){
                             for (int j = 1; j < lines.length; j++)
@@ -69,10 +69,10 @@ public class Interpreter {
                 }
             }else if(th.current().s().equals("while")){
                 String[] lines = line.split("#");
-                th = new Tokenhandler(parser.scanner.getTokens(lines[0]));
+                th = new TokenHandler(parser.scanner.getTokens(lines[0]));
                 th.next();
                 Token t = executeStatement(th, o, mem);
-                Tokenhandler.assertToken(t, Token.Type.BOOL);
+                TokenHandler.assertToken(t, Token.Type.BOOL);
                 while(t.s().equals("true")){
                     for(int i = 1;i < lines.length;i++) execute(lines[i], o, mem);
                     th.toFirst();
@@ -86,19 +86,19 @@ public class Interpreter {
         }
     }
 
-    private Token executeStatement(Tokenhandler th, Object o, Memory mem){
+    private Token executeStatement(TokenHandler th, Object o, Memory mem){
         List<Token> tokens = new ArrayList<>();
 
         while (th.hasNext()) tokens.add((th.next().t() == Token.Type.IDENTIFIER || th.current().s().equals("(")) ? executeNext(th, o, mem).toToken() : th.current());
 
-        return parser.createAST(new Tokenhandler(tokens)).execute(this);
+        return parser.createAST(new TokenHandler(tokens)).execute(this);
     }
 
-    private Variable executeNext(Tokenhandler th, Object o, Memory mem){
+    private Variable executeNext(TokenHandler th, Object o, Memory mem){
         Variable var;
         if (th.hasNext() && th.isValid() && (th.current().t() == Token.Type.IDENTIFIER || th.current().s().equals("("))) {
             if(th.current().s().equals("(")){
-                Tokenhandler tokenhandler = th.getInBracket();
+                TokenHandler tokenhandler = th.getInBracket();
                 Token t = executeStatement(tokenhandler, o, mem);
                 var = new Variable(Variable.getType(t.s()), t.s(), false);
             }else if (th.next().s().equals("(")) {
@@ -156,7 +156,7 @@ public class Interpreter {
         }
     }
 
-    private void executeMethod(Tokenhandler th, Object o, Memory mem){
+    private void executeMethod(TokenHandler th, Object o, Memory mem){
         String name = th.current().s();
         th.next();
         String[] paras = getParas(th.getInBracket(), o, mem);
@@ -175,7 +175,7 @@ public class Interpreter {
         }
     }
 
-    private String executeClass(Tokenhandler th, Object o, Memory mem){
+    private String executeClass(TokenHandler th, Object o, Memory mem){
         String name = th.current().s();
         Class c = System.MEM.getC(name);
         if(c == null) throw new RuntimeException("class " + name + " didn't exist");
@@ -192,7 +192,7 @@ public class Interpreter {
         return name;
     }
 
-    private String[] getParas(Tokenhandler th, Object o, Memory mem){
+    private String[] getParas(TokenHandler th, Object o, Memory mem){
         if(!th.hasNext()) return new String[0];
         ArrayList<String> values = new ArrayList<>();
         Token token;
@@ -203,13 +203,13 @@ public class Interpreter {
             current.add(token);
             if(th.hasNext()) {
                 if (th.next().s().equals(",")) {
-                    values.add(executeStatement(new Tokenhandler(current), o, mem).s());
+                    values.add(executeStatement(new TokenHandler(current), o, mem).s());
                     current = new ArrayList<>();
                 } else th.last();
             }
         }
 
-        if(!current.isEmpty()) values.add(executeStatement(new Tokenhandler(current), o, mem).s());
+        if(!current.isEmpty()) values.add(executeStatement(new TokenHandler(current), o, mem).s());
 
         return values.toArray(new String[0]);
     }
@@ -227,10 +227,10 @@ public class Interpreter {
     }
 
     public Token executeOperation(Token left, Token operator, Token right){
-        Tokenhandler.assertToken(operator, Token.Type.OPERATOR);
+        TokenHandler.assertToken(operator, Token.Type.OPERATOR);
         switch(left.t()){
             case NUMBER -> {
-                Tokenhandler.assertToken(right, Token.Type.NUMBER);
+                TokenHandler.assertToken(right, Token.Type.NUMBER);
                 double first = Double.parseDouble(left.s());
                 double second = Double.parseDouble(right.s());
                 switch (operator.s()){
@@ -246,7 +246,7 @@ public class Interpreter {
                 }
             }
             case BOOL -> {
-                Tokenhandler.assertToken(right, Token.Type.BOOL);
+                TokenHandler.assertToken(right, Token.Type.BOOL);
                 boolean first = Boolean.parseBoolean(left.s());
                 boolean second = Boolean.parseBoolean(right.s());
                 switch (operator.s()){
@@ -262,7 +262,7 @@ public class Interpreter {
                     else return new Token(left.s().substring(1, left.s().toCharArray().length) + right.s(), Token.Type.STRING);
                 }
                 else{
-                    Tokenhandler.assertToken(right, Token.Type.STRING);
+                    TokenHandler.assertToken(right, Token.Type.STRING);
                     switch (operator.s()){
                         case "==" -> { return new Token(String.valueOf(left.s().equals(right.s())), Token.Type.BOOL); }
                         case "!=" -> { return new Token(String.valueOf(!left.s().equals(right.s())), Token.Type.BOOL); }

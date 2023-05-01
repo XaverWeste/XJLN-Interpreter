@@ -3,16 +3,32 @@ package com.github.xjln.interpreter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public class Tokenhandler {
+/**
+ * class representing a bunch of tokens
+ */
+public class TokenHandler {
 
     private final List<Token> tokens;
     private int index;
 
-    public Tokenhandler(List<Token> tokens){
+    /**
+     * creates a new TokenHandler with the given Tokens
+     */
+    public TokenHandler(List<Token> tokens){
         this.tokens = tokens;
+        index = -1;
+    }
+
+    /**
+     * creates a new TokenHandler with the given Tokens
+     */
+    public TokenHandler(Token[] tokens){
+        this.tokens = new ArrayList<>();
+        this.tokens.addAll(Arrays.stream(tokens).toList());
         index = -1;
     }
 
@@ -84,7 +100,7 @@ public class Tokenhandler {
      * @return a new Tokenhandler with the tokens
      * @throws RuntimeException if current index isn't valid or there are no opening or closing brackets
      */
-    public Tokenhandler getInBracket() throws RuntimeException {
+    public TokenHandler getInBracket() throws RuntimeException {
         if(!isValid()) throw new RuntimeException("expected left bracket got nothing");
         Token current = tokens.get(index);
         if(!Set.of("(", "[", "{").contains(current.s())) throw new RuntimeException("expected left bracket got " + tokens.get(index).s());
@@ -102,7 +118,7 @@ public class Tokenhandler {
         }
 
         if(i > 0) throw new RuntimeException("expected right bracket got nothing");
-        return new Tokenhandler(tokenList);
+        return new TokenHandler(tokenList);
     }
 
     /**
