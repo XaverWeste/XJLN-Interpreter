@@ -87,7 +87,7 @@ public class Tokenhandler {
     public Tokenhandler getInBracket() throws RuntimeException {
         if(!isValid()) throw new RuntimeException("expected left bracket got nothing");
         Token current = tokens.get(index);
-        if(!Set.of("(", "[").contains(current.s())) throw new RuntimeException("expected left bracket got " + tokens.get(index).s());
+        if(!Set.of("(", "[", "{").contains(current.s())) throw new RuntimeException("expected left bracket got " + tokens.get(index).s());
 
         String openingBracket = current.s();
         String closingBracket = openingBracket.equals("(") ? ")" : openingBracket.equals("[") ? "]" : "}";
