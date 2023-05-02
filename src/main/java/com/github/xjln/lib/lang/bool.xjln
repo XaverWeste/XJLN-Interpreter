@@ -1,0 +1,10 @@
+native bool = true | false
+
+    native ==(bool b1, bool b2) : bool
+
+    native !=(bool b1, bool b2) : bool
+
+    native &(bool b1, bool b2) : bool
+
+    native |(bool b1, bool b2) : bool
+end

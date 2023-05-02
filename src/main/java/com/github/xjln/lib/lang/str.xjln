@@ -1,0 +1,8 @@
+native str
+
+    native +(str s, var v) : str
+
+    native ==(str s1, str s2) : bool
+
+    native !=(str s1, str s2) : bool
+end
