@@ -20,7 +20,7 @@ public class System {
     public static NativeMethod getNativeMethod(String className, String methodName, ParameterList pl){
         return switch (className){
             case "$" -> switch (methodName){
-                case "log" -> new NativeMethod(pl, (o, mem) -> java.lang.System.out.println(mem.vars.get("s").value()));
+                case "log" -> new NativeMethod(pl, (o, mem) -> java.lang.System.out.println(mem.vars.get("v").value()));
                 default -> throw new RuntimeException("for $ class is no native method " + methodName + "() defined");
             };
             default -> throw new RuntimeException("for class " + className + " is no native method " + methodName + "() defined");

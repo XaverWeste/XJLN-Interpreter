@@ -1,3 +1,3 @@
 def $[/]
-    native log(var s) : _
+    native log(var v)
 end

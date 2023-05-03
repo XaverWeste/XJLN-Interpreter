@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class Scanner {
+class Scanner {
 
     public List<Token> getTokens(String line){
         List<Token> tokens = new ArrayList<>();

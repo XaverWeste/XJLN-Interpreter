@@ -1,10 +1,21 @@
-native bool = true | false
+def bool = true | false
 
     native ==(bool b1, bool b2) : bool
 
-    native !=(bool b1, bool b2) : bool
+    def func !=(bool b1, bool b2) : bool = !(b1 == b2)
 
-    native &(bool b1, bool b2) : bool
+    def func !(bool b) : bool
+        if b -> result = false
+        else -> result = true
+    end
 
-    native |(bool b1, bool b2) : bool
+    def func &(bool b1, bool b2) : bool
+        if !b1 -> return false
+        result = b2
+    end
+
+    def func |(bool b1, bool b2) : bool
+        if b1 -> return true
+        result = b2
+    end
 end

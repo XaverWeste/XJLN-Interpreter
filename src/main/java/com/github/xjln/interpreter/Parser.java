@@ -1,167 +1,110 @@
 package com.github.xjln.interpreter;
 
-import com.github.xjln.lang.*;
 import com.github.xjln.lang.Class;
+import com.github.xjln.lang.ParameterList;
+import com.github.xjln.lang.Variable;
 import com.github.xjln.system.System;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
 
-public class Parser {
+@SuppressWarnings("All")
+class Parser {
 
     public final Scanner scanner;
     public static final String LIBPATH = "src/main/java/com/github/xjln/";
+    private final ArrayList<String> used;
 
     public Parser(){
         scanner = new Scanner();
+        used = new ArrayList<>();
     }
 
-    public AST createAST(TokenHandler th){
-        AST.Operation ast = new AST.Operation();
-        ast.token = th.next();
-
-        AST.Operation last;
-        Token op;
-
-        while (th.hasNext()){
-            op = th.assertToken(Token.Type.OPERATOR);
-            last = ast;
-            ast = new AST.Operation();
-            ast.left = last;
-            ast.token = op;
-            ast.right = new AST.Operation();
-            ast.right.token = th.next();
-        }
-
-        return ast;
-    }
-
-    public String parseFile(File file) throws FileNotFoundException {
-        StringBuilder sb = new StringBuilder();
+    public AST[] parseFile(File file) throws FileNotFoundException {
+        if(used.contains(file.getPath())){
+            java.lang.System.out.println("[waring]: " + file.getPath() + " is already used");
+            return null;
+        }else used.add(file.getPath());
+        ArrayList<AST> main = new ArrayList<>();
 
         java.util.Scanner sc = new java.util.Scanner(file);
         String line;
 
         while(sc.hasNextLine()){
             line = sc.nextLine().trim();
-            if(line.equals("main")) sb.append(getContent(sc));
-            else if(line.startsWith("def")) parseClassDef(sc, line);
-            else if(line.startsWith("use")) sb.append(parseFile(line, file));
-            else if(!line.equals("") && !line.startsWith("#")) throw new RuntimeException("illegal argument in \"" + line +"\"");
+            if(!line.startsWith("#")){
+                if(line.startsWith("use")){
+                    AST[] result = parseFile(file, line);
+                    if(result != null) Collections.addAll(main, result);
+                }else if(line.startsWith("main")){
+                    AST[] result = parseMain(sc, line);
+                    if(result != null) Collections.addAll(main, result);
+                }else if(line.startsWith("def")) parseClassDef(sc, line);
+                else throw new RuntimeException("illegal argument in: " + line);
+            }
         }
 
-        return sb.toString();
+        return main.toArray(new AST[0]);
     }
 
-    private String parseFile(String line, File current) throws FileNotFoundException {
-        TokenHandler th = new TokenHandler(scanner.getTokens(line));
-        th.assertToken("use");
-        th.assertToken(Token.Type.IDENTIFIER);
-        File file = new File(line.substring(4).startsWith("lib/") ? LIBPATH + line.substring(4) + ".xjln" : line.substring(4).startsWith("src") ? line.split(" ")[1] + ".xjln" : current.getPath().substring(0, current.getPath().length() - current.getName().length()) + line.split(" ")[1] + ".xjln");
-        if (!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
+    private AST[] parseFile(File from, String line) throws FileNotFoundException {
+        String[] args = line.split(" ");
+        if(!args[0].equals("use")) throw new RuntimeException("illegal argument in: " + line);
+        if(args.length != 2) throw new RuntimeException("expected 2 arguments, got " + args.length);
+        File file = new File(args[1].startsWith("lib/") ? LIBPATH + args[1] : args[1]);
+        if(!file.exists()) throw new RuntimeException("file " + file.getPath() + " does not exist");
         return parseFile(file);
     }
 
-    private void parseClassDef(java.util.Scanner sc, String current){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
-        th.assertToken("def");
-        String name = th.assertToken(Token.Type.IDENTIFIER).s();
-        th.assertToken("[");
-        ParameterList pl = parseParameterList(th.getInBracket());
-        Class c = new Class(pl);
-        current = sc.nextLine().trim();
-
-        while (!current.equals("end")){
-            if(current.startsWith("def")) parseMethodDef(sc, current, c);
-            else if(current.startsWith("native")) parseMethodDef(current, c, name);
-            else if(!current.equals("") && !current.startsWith("#")) throw new RuntimeException("illegal argument in: " + current);
-            current = sc.nextLine().trim();
+    private AST[] parseMain(java.util.Scanner sc, String line){
+        TokenHandler th = new TokenHandler(scanner.getTokens(line));
+        th.assertToken("main");
+        if(th.hasNext()){
+            th.assertToken("->");
+            return new AST[]{parseStatement(th)};
         }
-
-        System.MEM.set(name, c);
-        if(pl == null){
-            System.MEM.set("§" + name, c.createObject());
-            System.MEM.set(name, new Variable(name, "§" + name, true));
-        }
+        return parseConent(sc);
     }
 
-    private void parseMethodDef(java.util.Scanner sc, String current, Class c){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
+    private void parseClassDef(java.util.Scanner sc, String line){
+        TokenHandler th = new TokenHandler(scanner.getTokens(line));
         th.assertToken("def");
-        String name = th.assertToken(Token.Type.IDENTIFIER, Token.Type.OPERATOR).s();
-        th.assertToken("(");
-        ParameterList pl = parseParameterList(th.getInBracket());
-        if(pl == null) throw new RuntimeException("tried to define " + name + "() as static");
-        Method m = c.mem.getM(name);
-        if(m == null){
-            m = new Method();
-            c.mem.set(name, m);
-        }
-        m.add(pl, getContent(sc));
-    }
-
-    private void parseMethodDef(String current, Class c, String classname){
-        TokenHandler th = new TokenHandler(scanner.getTokens(current));
-        th.assertToken("native");
-        String name = th.assertToken(Token.Type.IDENTIFIER).s();
-        th.assertToken("(");
-        ParameterList pl = parseParameterList(th.getInBracket());
-        if(pl == null) throw new RuntimeException("tried to define " + name + "() as static");
-        c.mem.set(name, System.getNativeMethod(classname, name, pl));
+        th.assertToken(Token.Type.IDENTIFIER);
+        String name = th.current().s();
+        th.assertToken("[", "=");
+        if(System.MEM.getC(name) == null){
+            if(th.current().s().equals("[")){
+                Class c = new Class(parseParameterList(th.getInBracket()));
+            }else{
+                //TODO enums
+            }
+        }else java.lang.System.out.println("[waring]: " + name + " is already defined");
     }
 
     private ParameterList parseParameterList(TokenHandler th){
-        if(th.isEmpty()) return new ParameterList();
-        if(th.next().s().equals("/")) return null;
         ParameterList pl = new ParameterList();
-        Token t = th.current();
-        Variable v;
+
+        String type, name;
+
         while (th.hasNext()){
-            if(!Set.of("var", "bool", "num", "str", "const").contains(t.s())) throw new RuntimeException("illegal argument");
-            v = new Variable(t.s().equals("var") || t.s().equals("const") ?"":t.s());
-            t = th.assertToken(Token.Type.IDENTIFIER);
-            pl.addParameter(t.s(), v);
-            if(th.hasNext()){
-                th.assertToken(",");
-                t = th.next();
-            }
+            th.assertToken(Token.Type.IDENTIFIER);
+            type = th.current().s();
+            th.assertToken(Token.Type.IDENTIFIER);
+            name = th.current().s();
+
+            pl.addParameter(name, new Variable(type));
         }
+
         return pl;
     }
 
-    private String getContent(java.util.Scanner sc){
-        StringBuilder sb = new StringBuilder();
-        String line;
-        boolean breaked = false;
+    private AST.Statement parseStatement(TokenHandler th){
+        return null;
+    }
 
-        while(sc.hasNextLine()){
-            line = sc.nextLine().trim();
-            if(line.equals("end")){
-                breaked = true;
-                break;
-            }
-
-            if(line.startsWith("if") && line.split(" ")[0].equals("if")){
-                sb.append(line);
-                String content = getContent(sc);
-                String[] cases = content.split("else");
-                for(String s:cases[0].split("\n")) sb.append("#").append(s);
-                for(int i = 1;i < cases.length;i++){
-                    sb.append("##else");
-                    for(String s:cases[i].split("\n")) if(!s.equals("")) sb.append(sb.toString().endsWith("else") && s.trim().startsWith("if")?"":"#").append(s);
-                }
-                sb.append("\n");
-            }else if(line.startsWith("while") && line.split(" ")[0].equals("while")){
-                sb.append(line);
-                String content = getContent(sc);
-                for(String s:content.split("\n")) sb.append("#").append(s);
-                sb.append("\n");
-            }else if(!line.startsWith("#")) sb.append(line).append("\n");
-        }
-
-        if(!breaked) throw new RuntimeException("end expected");
-
-        return sb.toString();
+    private AST[] parseConent(java.util.Scanner sc){
+        return null;
     }
 }

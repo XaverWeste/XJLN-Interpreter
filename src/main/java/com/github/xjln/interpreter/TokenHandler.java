@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * class representing a bunch of tokens
  */
-public class TokenHandler {
+class TokenHandler {
 
     private final List<Token> tokens;
     private int index;
