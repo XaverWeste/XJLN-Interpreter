@@ -1,8 +1,12 @@
 package com.github.xjln.interpreter;
 
-sealed abstract class AST permits AST.Statement, AST.IfBranch, AST.WhileLoop{
+public sealed abstract class AST permits AST.Statement, AST.IfBranch, AST.WhileLoop {
 
-    final static class Statement extends AST{
+    sealed static class Statement extends AST permits AST.ReturnStatement {
+
+    }
+
+    final static class ReturnStatement extends Statement {
 
     }
 

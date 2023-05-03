@@ -106,7 +106,20 @@ class Parser {
         th.assertToken(Token.Type.IDENTIFIER);
         String name = th.current().s();
         th.assertToken("(");
-        Method method = new Method();
+        ParameterList pl = parseParameterList(th.getInBracket());
+        Method method = c.mem.getM(name);
+        if(method == null){
+            method = new Method();
+            c.mem.set(name, method);
+        }else if(method.getCode(pl) != null) throw new RuntimeException("method is already defined in " + line);
+
+        if(th.hasNext()){
+            th.assertToken(":", "->");
+            if(th.current().s().equals("->")) method.add(pl, new AST[]{parseStatement(th)});
+            else{
+                //TODO
+            }
+        }else method.add(pl, parseConent(sc));
 
         c.mem.set(name, method);
     }
@@ -128,7 +141,7 @@ class Parser {
         return pl;
     }
 
-    private AST.Statement parseStatement(TokenHandler th){
+    private AST parseStatement(TokenHandler th){
         return null;
     }
 
