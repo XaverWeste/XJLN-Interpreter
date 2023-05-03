@@ -1,6 +1,7 @@
 package com.github.xjln.interpreter;
 
 import com.github.xjln.lang.Class;
+import com.github.xjln.lang.Method;
 import com.github.xjln.lang.ParameterList;
 import com.github.xjln.lang.Variable;
 import com.github.xjln.system.System;
@@ -10,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-@SuppressWarnings("All")
 class Parser {
 
     public final Scanner scanner;
@@ -77,10 +77,38 @@ class Parser {
         if(System.MEM.getC(name) == null){
             if(th.current().s().equals("[")){
                 Class c = new Class(parseParameterList(th.getInBracket()));
+                if(th.hasNext()){
+                    //TODO heredity
+                }
+
+                line = sc.nextLine().trim();
+
+                while (sc.hasNextLine() && !line.startsWith("end")){
+                    if(!line.startsWith("#")){
+                        if(line.startsWith("def")) parseMethodDef(sc, line, c);
+                        else if(line.startsWith("native")){
+                            //TODO
+                        }else throw new RuntimeException("illegal argument in " + line);
+                    }
+                    line = sc.nextLine().trim();
+                }
+
+                System.MEM.set(name, c);
             }else{
                 //TODO enums
             }
         }else java.lang.System.out.println("[waring]: " + name + " is already defined");
+    }
+
+    private void parseMethodDef(java.util.Scanner sc, String line, Class c){
+        TokenHandler th = new TokenHandler(scanner.getTokens(line));
+        th.assertToken("def");
+        th.assertToken(Token.Type.IDENTIFIER);
+        String name = th.current().s();
+        th.assertToken("(");
+        Method method = new Method();
+
+        c.mem.set(name, method);
     }
 
     private ParameterList parseParameterList(TokenHandler th){

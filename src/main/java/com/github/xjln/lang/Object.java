@@ -7,7 +7,7 @@ public class Object {
     public final Class clas;
 
     public Object(Memory m, Class clas){
-        mem=m;
+        mem = m;
         this.clas = clas;
     }
 }
