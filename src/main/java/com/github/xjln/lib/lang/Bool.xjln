@@ -1,0 +1,29 @@
+# Boolean
+# it is extremely important that no functions are removed, as some are required internally by the interpreter.
+# standard use
+def bool = true | false
+
+    # determines whether both booleans have the same value
+    native ==(bool b1, bool b2) : bool
+
+    # determines whether both booleans have not the same value
+    def !=(bool b1, bool b2) : bool -> !(b1 == b2)
+
+    # negates the value of the boolean
+    def !(bool b) : bool
+        if b -> result = false
+        else -> result = true
+    end
+
+    # determines whether both booleans have the value true
+    def &(bool b1, bool b2) : bool
+        if !b1 -> return false
+        result = b2
+    end
+
+    # determines whether one of the booleans have the value true
+    def |(bool b1, bool b2) : bool
+        if b1 -> return true
+        result = b2
+    end
+end

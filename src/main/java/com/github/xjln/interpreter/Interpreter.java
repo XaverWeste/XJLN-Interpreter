@@ -8,6 +8,16 @@ public class Interpreter {
 
     public Interpreter(){
         parser = new Parser();
+        parseStandardUse();
+    }
+
+    private void parseStandardUse(){
+        String[] files = new String[]{
+                parser.LIBPATH + "lib/System.xjln",
+                parser.LIBPATH + "lib/lang/Bool.xjln"
+        };
+
+        for(String path:files) parser.parseFile(path);
     }
 
     public void execute(File file){

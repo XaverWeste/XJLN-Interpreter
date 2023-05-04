@@ -4,6 +4,8 @@ import com.github.xjln.interpreter.Token;
 
 public class Variable{
 
+    //TODO rework
+
     private final boolean constant;
     private final String type;
     private String value;
@@ -80,11 +82,10 @@ public class Variable{
 
     public static String getType(String value){
         if(value.startsWith("\"")&&value.endsWith("\"")) return "str";
-        if(value.matches("^[0-9.]+$")) return "num";
-        if(value.equals("true")||value.equals("false")) return "bool";
+        if(value.matches("[0-9]+(.[0-9]+)?")) return "num";
         if(value.equals("")) return "";
         if(value.startsWith("§§§")) return "§";
         if(value.startsWith("§")) return value.substring(1).split("§")[0];
-        throw new RuntimeException("illegal variable type");
+        return "enum";
     }
 }

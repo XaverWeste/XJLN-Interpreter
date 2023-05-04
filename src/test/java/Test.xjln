@@ -1,5 +1,1 @@
-use lib/System
-
-main
-
-end
+main -> $:log("Hello World!")

@@ -1,7 +1,5 @@
 package com.github.xjln.system;
 
-import com.github.xjln.lang.NativeMethod;
-import com.github.xjln.lang.ParameterList;
 import org.jetbrains.annotations.NotNull;
 
 public class System {
@@ -15,15 +13,5 @@ public class System {
         while(MEM.existO(sb.toString() + i)) i++;
         sb.append(i);
         return sb.toString();
-    }
-
-    public static NativeMethod getNativeMethod(String className, String methodName, ParameterList pl){
-        return switch (className){
-            case "$" -> switch (methodName){
-                case "log" -> new NativeMethod(pl, (o, mem) -> java.lang.System.out.println(mem.vars.get("v").value()));
-                default -> throw new RuntimeException("for $ class is no native method " + methodName + "() defined");
-            };
-            default -> throw new RuntimeException("for class " + className + " is no native method " + methodName + "() defined");
-        };
     }
 }

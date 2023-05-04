@@ -1,3 +1,7 @@
+# System
+# standard use
 def $[/]
+
+    # prints the value of the given variable in the console
     native log(var v)
 end
