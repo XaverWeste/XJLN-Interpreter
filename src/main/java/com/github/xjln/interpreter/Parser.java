@@ -47,7 +47,8 @@ class Parser {
                 if(line.startsWith("use")){
                     AST[] result = parseFile(file, line);
                     if(result != null) Collections.addAll(main, result);
-                }
+                }else if(line.startsWith("def")) parseDef(sc, line);
+                //TODO
                 else throw new RuntimeException("illegal argument in: " + line);
             }
         }
@@ -62,5 +63,45 @@ class Parser {
         File file = new File(args[1].startsWith("lib/") ? LIBPATH + args[1] + ".xjln" : args[1] + ".xjln");
         if(!file.exists()) throw new RuntimeException("file " + file.getPath() + " does not exist");
         return parseFile(file);
+    }
+
+    private void parseDef(java.util.Scanner sc, String line){
+        TokenHandler th = new TokenHandler(scanner.getTokens(line));
+        th.assertToken("def");
+        String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        th.assertToken("=", "[");
+        if(th.current().s().equals("[")) parseClassDef(sc, line, th, name);
+        else parseEnumDef(sc, line, th, name);
+    }
+
+    private void parseClassDef(java.util.Scanner sc, String line, TokenHandler th, String name){
+        //TODO
+    }
+
+    private void parseEnumDef(java.util.Scanner sc, String line, TokenHandler th, String name){
+        //TODO
+    }
+
+    private ParameterList parseParameterList(TokenHandler th){
+        ParameterList pl = new ParameterList();
+
+        if(th.hasNext()){
+            if(th.next().s().equals("/")) return null;
+            th.toFirst();
+        }
+
+        String type, name;
+
+        while (th.hasNext()){
+            type = th.assertToken(Token.Type.IDENTIFIER).s();
+            name = th.assertToken(Token.Type.IDENTIFIER).s();
+            pl.addParameter(name, new Variable(type));
+            if(th.hasNext()){
+                th.assertToken(",");
+                if(!th.hasNext()) throw new RuntimeException("illegal argument");
+            }
+        }
+
+        return pl;
     }
 }

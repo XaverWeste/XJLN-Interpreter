@@ -1,13 +1,14 @@
 package com.github.xjln.lang;
 
 import com.github.xjln.system.Memory;
+import com.github.xjln.system.System;
 
 public class Class {
     public final Memory.ClassMemory mem;
     public final ParameterList pl;
-    public final Class[] superClasses;
+    public final String[] superClasses;
 
-    public Class(ParameterList pl, Class[] superClasses){
+    public Class(ParameterList pl, String[] superClasses){
         this.pl = pl;
         this.superClasses = superClasses;
         mem = new Memory.ClassMemory();
@@ -18,8 +19,12 @@ public class Class {
     }
 
     public Method getMethod(String name, String[] parameters){
-        if(mem.getM(name) != null && mem.getM(name).getPl(parameters) != null) return mem.getM(name);
-        for(Class clas:superClasses) if(clas.mem.getM(name) != null && clas.mem.getM(name).getPl(parameters) != null) return clas.mem.getM(name);
+        Method m = mem.getM(name);
+        if(m != null && m.getPl(parameters) != null) return m;
+        for(String clas:superClasses){
+            m = System.MEM.getC(clas).getMethod(name, parameters);
+            if(m != null) return m;
+        }
         return null;
     }
 }
