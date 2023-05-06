@@ -7,7 +7,9 @@ def bool = true | false
     native ==(bool b1, bool b2) : bool
 
     # determines whether both booleans have not the same value
-    def !=(bool b1, bool b2) : bool -> !(b1 == b2)
+    def !=(bool b1, bool b2) : bool
+        result = !(b1 == b2)
+    end
 
     # negates the value of the boolean
     def !(bool b) : bool

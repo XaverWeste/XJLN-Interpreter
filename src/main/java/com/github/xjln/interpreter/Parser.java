@@ -5,12 +5,14 @@ import com.github.xjln.lang.Enum;
 import com.github.xjln.lang.Method;
 import com.github.xjln.lang.ParameterList;
 import com.github.xjln.lang.Variable;
+import com.github.xjln.system.Memory;
 import com.github.xjln.system.System;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 class Parser {
 
@@ -69,6 +71,7 @@ class Parser {
         TokenHandler th = new TokenHandler(scanner.getTokens(line));
         th.assertToken("def");
         String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        if(!System.validateName(name)) throw new RuntimeException("illegal classname in " + line);
         th.assertToken("=", "[");
         if(th.current().s().equals("[")) parseClassDef(sc, line, th, name);
         else parseEnumDef(sc, line, th, name);
@@ -84,7 +87,15 @@ class Parser {
             throw exception;
         }
         Class c = new Class(pl, new String[0]); //TODO Superclasses
-        //TODO
+
+        while(sc.hasNextLine()) {
+            line = sc.nextLine().trim();
+            if (!line.startsWith("#") && !line.equals("")) {
+                if(line.startsWith("def")) parseMethodDef(sc, line, c.mem);
+                else throw new RuntimeException("illegal argument in " + line);
+            }
+        }
+
         if(c.pl != null){
             if(System.MEM.getC(name) != null) throw new RuntimeException("class already exist in " + line);
             System.MEM.set(name, c);
@@ -98,6 +109,7 @@ class Parser {
     private void parseEnumDef(java.util.Scanner sc, String line, TokenHandler th, String name){
         Enum e;
         ArrayList<String> values = new ArrayList<>();
+
         try {
             values.add(th.assertToken(Token.Type.IDENTIFIER).s());
             while(th.hasNext() && th.next().s().equals("|")) values.add(th.assertToken(Token.Type.IDENTIFIER).s());
@@ -107,9 +119,48 @@ class Parser {
             exception.setStackTrace(runtimeException.getStackTrace());
             throw exception;
         }
-        //TODO
+
+        while(sc.hasNextLine()) {
+            line = sc.nextLine().trim();
+            if (!line.startsWith("#") && !line.equals("")) {
+                if(line.startsWith("def")) parseMethodDef(sc, line, e.mem);
+                else throw new RuntimeException("illegal argument in " + line);
+            }
+        }
+
         if(System.MEM.exist(name)) throw new RuntimeException("instance already exist in " + line);
         System.MEM.set(name, e);
+    }
+
+    private void parseMethodDef(java.util.Scanner sc, String line, Memory.ClassMemory mem){
+        TokenHandler th = new TokenHandler(scanner.getTokens(line));
+        th.assertToken("def");
+        String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        th.assertToken("(");
+        ParameterList pl;
+
+        try{
+            pl = parseParameterList(th.getInBracket());
+        }catch (RuntimeException runtimeException){
+            RuntimeException exception = new RuntimeException(runtimeException.getMessage() + " in " + line);
+            exception.setStackTrace(runtimeException.getStackTrace());
+            throw exception;
+        }
+
+        Method m = mem.getM(name);
+        if(m == null){
+            m = new Method();
+            mem.set(name, m);
+        }else if(m.getCode(pl) != null) throw new RuntimeException("Method " + name + " is already defined in " + line);
+
+        List<AST> ast = new ArrayList<>();
+        if(th.hasNext()){
+            th.assertToken(":"); // TODO
+            ast.add(new AST.Statement(th.assertToken(Token.Type.IDENTIFIER).s() + " result"));
+        }
+
+        ast.addAll(parseContent(sc));
+        m.add(pl, ast.toArray(new AST[0]));
     }
 
     private ParameterList parseParameterList(TokenHandler th){
@@ -126,6 +177,7 @@ class Parser {
             type = th.assertToken(Token.Type.IDENTIFIER).s();
             name = th.assertToken(Token.Type.IDENTIFIER).s();
             pl.addParameter(name, new Variable(type));
+
             if(th.hasNext()){
                 th.assertToken(",");
                 if(!th.hasNext()) throw new RuntimeException("illegal argument");
@@ -133,5 +185,46 @@ class Parser {
         }
 
         return pl;
+    }
+
+    private List<AST> parseContent(java.util.Scanner sc){
+        List<AST> result = new ArrayList<>();
+        int i = 1;
+        String line;
+
+        while (i > 0 && sc.hasNextLine()){
+            line = sc.nextLine().trim();
+            if(!line.startsWith("#") && !line.equals("")){
+                if(line.startsWith("end")){
+                    if(!line.equals("end")) throw new RuntimeException("illegal argument in " + line);
+                    i--;
+                }else result.add(parseAST(sc, line));
+            }
+        }
+
+        if(i > 0) throw new RuntimeException("Method was not closed");
+        return result;
+    }
+
+    private AST parseAST(java.util.Scanner sc, String line){
+        switch (line.split(" ")[0]){
+            case "if" -> {
+                return parseIf(sc, line);
+            }
+            case "while" -> {
+                return parseWhile(sc, line);
+            }
+            default -> throw new RuntimeException("illegal argument in " + line);
+        }
+    }
+
+    private AST.IfBranch parseIf(java.util.Scanner sc, String line){
+        //TODO
+        return null;
+    }
+
+    private AST.WhileLoop parseWhile(java.util.Scanner sc, String line){
+        //TODO
+        return null;
     }
 }

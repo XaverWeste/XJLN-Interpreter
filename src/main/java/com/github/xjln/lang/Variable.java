@@ -85,6 +85,7 @@ public class Variable{
         if(value.equals("")) return "";
         if(value.startsWith("§§§")) return "§";
         if(value.startsWith("§")) return value.substring(1).split("§")[0];
-        return "enum";
+        if(value.matches("[a-zA-Z]+.[a-zA-Z]+")) return value.split("§")[0];
+        throw new RuntimeException("illegal variable value " + value);
     }
 }
