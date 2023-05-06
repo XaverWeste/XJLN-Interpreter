@@ -227,4 +227,14 @@ class Parser {
         //TODO
         return null;
     }
+
+    private AST.Call parseCall(TokenHandler th){
+        //TODO
+        return null;
+    }
+
+    private AST.Calculation parseCalculation(TokenHandler th){
+        //TODO
+        return null;
+    }
 }
