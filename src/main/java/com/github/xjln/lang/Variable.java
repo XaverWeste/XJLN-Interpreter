@@ -71,7 +71,6 @@ public class Variable{
         return new Token(value, switch (getType(value)){
             case "str" -> Token.Type.STRING;
             case "num" -> Token.Type.NUMBER;
-            case "bool" -> Token.Type.BOOL;
             default -> Token.Type.IDENTIFIER;
         });
     }

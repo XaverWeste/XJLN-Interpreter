@@ -1,6 +1,7 @@
 package com.github.xjln.interpreter;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Interpreter {
 
@@ -8,7 +9,7 @@ public class Interpreter {
 
     public Interpreter(){
         parser = new Parser();
-        parseStandardUse();
+        //parseStandardUse();
     }
 
     private void parseStandardUse(){
@@ -22,6 +23,12 @@ public class Interpreter {
 
     public void execute(File file){
         if(!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
+
+        try {
+            parser.parseFile(file);
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
 
         java.lang.System.out.println("\nXJLN Process finished successfully\n");
     }

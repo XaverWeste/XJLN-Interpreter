@@ -1,6 +1,7 @@
 package com.github.xjln.interpreter;
 
 import com.github.xjln.lang.Class;
+import com.github.xjln.lang.Enum;
 import com.github.xjln.lang.Method;
 import com.github.xjln.lang.ParameterList;
 import com.github.xjln.lang.Variable;
@@ -75,11 +76,41 @@ class Parser {
     }
 
     private void parseClassDef(java.util.Scanner sc, String line, TokenHandler th, String name){
+        ParameterList pl;
+        try{
+            pl = parseParameterList(th.getInBracket());
+        }catch (RuntimeException e){
+            RuntimeException exception = new RuntimeException(e.getMessage() + " in " + line);
+            exception.setStackTrace(e.getStackTrace());
+            throw exception;
+        }
+        Class c = new Class(pl, new String[0]); //TODO Superclasses
         //TODO
+        if(c.pl != null){
+            if(System.MEM.getC(name) != null) throw new RuntimeException("class already exist in " + line);
+            System.MEM.set(name, c);
+        }else{
+            if(System.MEM.exist(name)) throw new RuntimeException("instance already exist in " + line);
+            System.MEM.set(name, new Variable(name, "§" + name, false));
+            System.MEM.set("§" + name, c.createObject());
+        }
     }
 
     private void parseEnumDef(java.util.Scanner sc, String line, TokenHandler th, String name){
+        Enum e;
+        ArrayList<String> values = new ArrayList<>();
+        try {
+            values.add(th.assertToken(Token.Type.IDENTIFIER).s());
+            while(th.hasNext() && th.next().s().equals("|")) values.add(th.assertToken(Token.Type.IDENTIFIER).s());
+            e = new Enum(values.toArray(new String[0]));
+        }catch (RuntimeException runtimeException){
+            RuntimeException exception = new RuntimeException(runtimeException.getMessage() + " in " + line);
+            exception.setStackTrace(runtimeException.getStackTrace());
+            throw exception;
+        }
         //TODO
+        if(System.MEM.exist(name)) throw new RuntimeException("instance already exist in " + line);
+        System.MEM.set(name, e);
     }
 
     private ParameterList parseParameterList(TokenHandler th){

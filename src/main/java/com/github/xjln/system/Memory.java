@@ -1,6 +1,7 @@
 package com.github.xjln.system;
 
 import com.github.xjln.lang.Class;
+import com.github.xjln.lang.Enum;
 import com.github.xjln.lang.Method;
 import com.github.xjln.lang.Object;
 import com.github.xjln.lang.Variable;
@@ -10,8 +11,9 @@ import java.util.HashMap;
 public sealed class Memory permits Memory.SystemMemory, Memory.ClassMemory {
 
     public static final class SystemMemory extends Memory{
-        private final HashMap<String,Class> classes=new HashMap<>();
-        private final HashMap<String, Object> objects=new HashMap<>();
+        private final HashMap<String, Class> classes = new HashMap<>();
+        private final HashMap<String, Object> objects = new HashMap<>();
+        private final HashMap<String, Enum> enums = new HashMap<>();
 
         public SystemMemory(){
             vars.put("result",new Variable());
@@ -19,6 +21,10 @@ public sealed class Memory permits Memory.SystemMemory, Memory.ClassMemory {
 
         public Class getC(String name){
             return classes.get(name);
+        }
+
+        public Enum getE(String name){
+            return enums.get(name);
         }
 
         public Object getO(String name){
@@ -35,6 +41,15 @@ public sealed class Memory permits Memory.SystemMemory, Memory.ClassMemory {
 
         public void set(String name,Object o){
             objects.put(name,o);
+        }
+
+        public void set(String name,Enum e){
+            enums.put(name,e);
+        }
+
+        public boolean exist(String name){
+            if(classes.containsKey(name)) return true;
+            return enums.containsKey(name);
         }
     }
 

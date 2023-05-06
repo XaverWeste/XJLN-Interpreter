@@ -2,7 +2,7 @@ package com.github.xjln.interpreter;
 
 public record Token(String s, Type t){
 
-    public enum Type{SIMPLE,IDENTIFIER,NUMBER,STRING,OPERATOR,BOOL}
+    public enum Type{SIMPLE,IDENTIFIER,NUMBER,STRING,OPERATOR}
 
     @Override
     public boolean equals(Object obj) {
@@ -13,7 +13,6 @@ public record Token(String s, Type t){
         switch (s){
             case "str" -> { return Type.STRING; }
             case "num" -> { return Type.NUMBER; }
-            case "bool" -> { return Type.BOOL; }
             default -> { return Type.IDENTIFIER; }
         }
     }

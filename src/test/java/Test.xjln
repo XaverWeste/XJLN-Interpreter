@@ -1,1 +1,5 @@
-main -> $:log("Hello World!")
+#main -> $:log("Hello World!")
+
+def bool [var i]
+
+def bool = true | false

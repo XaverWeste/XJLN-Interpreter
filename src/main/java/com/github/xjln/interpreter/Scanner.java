@@ -44,7 +44,7 @@ class Scanner {
                     value.append(chars[i]);
                 }
 
-                tokens.add(new Token(value.toString(), Set.of("true", "false").contains(value.toString()) ? Token.Type.BOOL : Token.Type.IDENTIFIER));
+                tokens.add(new Token(value.toString(), Token.Type.IDENTIFIER));
 
             }else if(isOperator(chars[i])){
 
