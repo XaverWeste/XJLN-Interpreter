@@ -1,0 +1,6 @@
+def obj[]
+
+    native ==(obj o1, obj o2) :: bool
+
+    native toString(obj o) :: bool
+end

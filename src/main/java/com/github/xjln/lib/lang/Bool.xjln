@@ -1,36 +1,19 @@
-def bool = true | false
+def bool = true | false => obj
 
-    native ==(bool b) : bool
+    def !=(bool value, bool b) :: bool = !(value == b)
 
-    def !=(bool b) : bool
-        result = !(value == b)
+    def !(bool value) :: bool
+        if value -> return false
+        else -> return true
     end
 
-    def !() : bool
-        if value -> result = false
-        else -> result = true
+    def &(bool value, bool b) : bool
+        if !value -> return = false
+        else -> return = b
     end
 
-    def &(bool b) : bool
-        if !value -> result = false
-        else -> result = b
+    def |(bool value, bool b) : bool
+        if value -> return = true
+        else -> return = b
     end
-
-    def |(bool b) : bool
-        if value -> result = true
-        else -> result = b
-    end
-
-    def toString() : str
-        if value -> result = "true"
-        else -> result = "false"
-    end
-end
-
-def Bool[/]
-
-    def ofString(str s) : bool
-        result = s == "true"
-    end
-
 end
