@@ -178,6 +178,13 @@ class TokenHandler {
     }
 
     /**
+     * asserts that the tokenHandler has no more Tokens
+     */
+    public void assertNull(){
+        if(hasNext()) throw new RuntimeException("expected nothing, got " + next().t());
+    }
+
+    /**
      * assert content for a given Token
      * @param token Token who assert content for
      * @param string content to assert

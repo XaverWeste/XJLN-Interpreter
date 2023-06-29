@@ -9,6 +9,10 @@ public record Token(String s, Type t){
         return obj instanceof Token && ((Token) obj).t == t && ((Token) obj).s.equals(s);
     }
 
+    public boolean equals(String s){
+        return this.s.equals(s);
+    }
+
     public static Type toType(String s){
         switch (s){
             case "str" -> { return Type.STRING; }

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-class Scanner {
+class Lexer {
 
-    public List<Token> getTokens(String line){
+    public TokenHandler getTokens(String line){
         List<Token> tokens = new ArrayList<>();
         char[] chars = line.toCharArray();
         StringBuilder value;
@@ -80,7 +80,7 @@ class Scanner {
 
         }
 
-        return tokens;
+        return new TokenHandler(tokens);
     }
 
     private boolean isOperator(char c){

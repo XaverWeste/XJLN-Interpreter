@@ -1,6 +1,7 @@
 package com.github.xjln.interpreter;
 
 import java.io.File;
+import java.util.function.Consumer;
 
 public class XJLN {
 
@@ -24,7 +25,7 @@ public class XJLN {
     /**
      * Executes the given .xjln file and returns the output.
      */
-    public String execute(File file){
-        return interpreter.execute(file, "");
+    public void execute(String directory, Consumer<String> output){
+        output.accept(interpreter.execute(directory));
     }
 }

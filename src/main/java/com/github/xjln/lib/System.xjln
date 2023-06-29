@@ -1,4 +1,0 @@
-def $[/]
-
-    native log(var v)
-end
