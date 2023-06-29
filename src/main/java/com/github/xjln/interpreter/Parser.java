@@ -2,6 +2,8 @@ package com.github.xjln.interpreter;
 
 import com.github.xjln.lang.Class;
 import com.github.xjln.lang.Enum;
+import com.github.xjln.lang.ParameterList;
+import com.github.xjln.lang.Variable;
 import com.github.xjln.system.System;
 
 import java.io.File;
@@ -125,6 +127,55 @@ class Parser {
     }
 
     private void parseClassDef(TokenHandler th){
+        ParameterList pl = parseParameterList(th.getInBracket());
+        String constructor = null;
+        ArrayList<String> superClasses = new ArrayList<>();
 
+        if(th.hasNext()){
+            if(th.assertToken("=>", "->").equals("->")){
+                constructor = th.assertToken(Token.Type.IDENTIFIER).s(); //TODO
+                if(th.hasNext()) th.assertToken("=>");
+            }
+
+            if(th.current().equals("=>")){
+                th.assertHasNext();
+                while (th.hasNext()) {
+                    superClasses.add(th.assertToken(Token.Type.IDENTIFIER).s());
+                    if (th.hasNext()) {
+                        th.assertToken(",");
+                        th.assertHasNext();
+                    }
+                }
+            }
+        }
+
+        currentClass = new Class(pl, constructor, superClasses.toArray(new String[0]));
+
+        String line;
+        while (sc.hasNextLine()) {
+            line = sc.nextLine().trim();
+            if (!line.equals("") && !line.startsWith("#")) {
+                if(line.startsWith("def ")) parseMethodDef(line);
+                else throw new RuntimeException("illegal argument in: " + line);
+            }
+        }
+    }
+
+    private void parseMethodDef(String line){
+
+    }
+
+    private ParameterList parseParameterList(TokenHandler th){
+        ParameterList pl = new ParameterList();
+
+        while (th.hasNext()){
+            String type = th.assertToken(Token.Type.IDENTIFIER).s();
+            Variable v = type.equals("var") ? new Variable() : new Variable(type);
+            String name = th.assertToken(Token.Type.IDENTIFIER).s();
+
+            pl.addParameter(name, v);
+        }
+
+        return pl;
     }
 }

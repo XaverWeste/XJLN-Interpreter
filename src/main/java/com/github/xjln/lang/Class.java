@@ -6,10 +6,12 @@ import com.github.xjln.system.System;
 public class Class {
     public final Memory.ClassMemory mem;
     public final ParameterList pl;
+    public final String constructor;
     public final String[] superClasses;
 
-    public Class(ParameterList pl, String[] superClasses){
+    public Class(ParameterList pl, String constructor, String[] superClasses){
         this.pl = pl;
+        this.constructor = constructor;
         this.superClasses = superClasses;
         mem = new Memory.ClassMemory();
     }
