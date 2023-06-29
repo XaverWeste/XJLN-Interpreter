@@ -1,6 +1,8 @@
 package com.github.xjln.interpreter;
 
 import com.github.xjln.lang.Class;
+import com.github.xjln.lang.Enum;
+import com.github.xjln.system.System;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,7 +15,8 @@ class Parser {
     public final Lexer lexer;
     private Scanner sc;
     private HashMap<String, String> uses;
-    private Class current;
+    private Class currentClass = null;
+    private Enum currentEnum = null;
     private String className;
 
     public Parser(){
@@ -37,8 +40,15 @@ class Parser {
             if (!line.equals("") && !line.startsWith("#")) {
                 if (line.startsWith("use")) parseUseDef(line);
                 else if(line.startsWith("def")){
-                    //parseDef(line);
-                    //classes.put(className, current);
+                    parseDef(line);
+                    if(currentClass != null) {
+                        System.MEM.set(path + "/" + className, currentClass);
+                        currentClass = null;
+                    }else{
+                        System.MEM.set(path + "/" + className, currentEnum);
+                        currentEnum = null;
+                    }
+                    use(path + "/" + className, className);
                 } else throw new RuntimeException("illegal argument in: " + line);
             }
         }
@@ -68,6 +78,53 @@ class Parser {
             as = th.assertToken(Token.Type.IDENTIFIER).s();
 
         th.assertNull();
-        //TODO
+
+        if(as != null){
+            if(use.size() != 1)
+                throw new RuntimeException("only can alias one in: " + line);
+            else
+                use(from != null ? from + "/" + use.get(0) : use.get(0), as);
+        }else{
+            for(String s:use)
+                use(from != null ? from + "/" + s : s, null);
+        }
+    }
+
+    private void use(String validName, String name){
+        if(name == null)
+            name = validName.split("/")[validName.split("/").length - 1]; //TODO
+
+        if(uses.containsKey(name)) throw new RuntimeException(name + " is already used in");
+
+        uses.put(name, validName);
+    }
+
+    private void parseDef(String line){
+        TokenHandler th = lexer.getTokens(line);
+        th.assertToken("def");
+        className = th.assertToken(Token.Type.IDENTIFIER).s();
+
+        if(th.assertToken("[", "=").equals("="))
+            parseEnumDef(th);
+        else
+            parseClassDef(th);
+    }
+
+    private void parseEnumDef(TokenHandler th){
+        ArrayList<String> values = new ArrayList<>();
+
+        while (th.hasNext()){
+            values.add(th.assertToken(Token.Type.IDENTIFIER).s());
+            if(th.hasNext()){
+                th.assertToken(",");
+                th.assertHasNext();
+            }
+        }
+
+        currentEnum = new Enum(values.toArray(new String[0]));
+    }
+
+    private void parseClassDef(TokenHandler th){
+
     }
 }

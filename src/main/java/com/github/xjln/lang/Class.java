@@ -22,7 +22,7 @@ public class Class {
         Method m = mem.getM(name);
         if(m != null && m.getPl(parameters) != null) return m;
         for(String clas:superClasses){
-            m = System.mem.getC(clas).getMethod(name, parameters);
+            m = System.MEM.getC(clas).getMethod(name, parameters);
             if(m != null) return m;
         }
         return null;

@@ -185,6 +185,13 @@ class TokenHandler {
     }
 
     /**
+     * assert that the tokenHandler has a next Token
+     */
+    public void assertHasNext(){
+        if(!hasNext()) throw new RuntimeException("expected Token, got nothing");
+    }
+
+    /**
      * assert content for a given Token
      * @param token Token who assert content for
      * @param string content to assert
