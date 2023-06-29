@@ -1,9 +1,8 @@
 package com.github.xjln.interpreter;
 
+import com.github.xjln.lang.*;
 import com.github.xjln.lang.Class;
 import com.github.xjln.lang.Enum;
-import com.github.xjln.lang.ParameterList;
-import com.github.xjln.lang.Variable;
 import com.github.xjln.system.System;
 
 import java.io.File;
@@ -156,13 +155,35 @@ class Parser {
             line = sc.nextLine().trim();
             if (!line.equals("") && !line.startsWith("#")) {
                 if(line.startsWith("def ")) parseMethodDef(line);
-                else throw new RuntimeException("illegal argument in: " + line);
+                else parseFieldDef(line);
             }
         }
     }
 
-    private void parseMethodDef(String line){
+    private void parseFieldDef(String line){
+        TokenHandler th = lexer.getTokens(line);
+        String type = th.assertToken(Token.Type.IDENTIFIER).s();
+        Variable v = type.equals("var") ? new Variable() : new Variable(type);
+        String name = th.assertToken(Token.Type.IDENTIFIER).s();
+        currentClass.mem.set(name, v);
+    }
 
+    private void parseMethodDef(String line){
+        TokenHandler th = lexer.getTokens(line);
+        th.assertToken("def");
+        String name = th.assertToken(Token.Type.IDENTIFIER, Token.Type.OPERATOR).s();
+        th.assertToken("(");
+        ParameterList pl = parseParameterList(th.getInBracket());
+        th.assertNull();
+
+        Method m = currentClass.mem.getM(name);
+
+        if(m == null){
+            m = new Method();
+            currentClass.mem.set(name, m);
+        }
+
+        m.add(pl, toAST());
     }
 
     private ParameterList parseParameterList(TokenHandler th){
@@ -177,5 +198,25 @@ class Parser {
         }
 
         return pl;
+    }
+
+    private AST[] toAST(){
+        ArrayList<AST> ast = new ArrayList<>();
+
+        String line = "";
+        while (!line.equals("end") && sc.hasNextLine()){
+            line = sc.nextLine();
+            if(!line.startsWith("#") && !line.equals("") && !line.equals("end")){
+                if(line.startsWith("if ")){
+
+                }else if(line.startsWith("while ")){
+
+                }else{
+                    AST.Calc calc = new AST.Calc();
+                }
+            }
+        }
+
+        return ast.toArray(new AST[0]);
     }
 }

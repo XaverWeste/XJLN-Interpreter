@@ -1,11 +1,8 @@
 package com.github.xjln.interpreter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Objects;
 
 class Interpreter {
 
@@ -29,21 +26,13 @@ class Interpreter {
                 }
 
                  */
+                output.add("\nXJLN Process finished successfully\n");
             }
         }else output.add("src folder is null");
 
         StringBuilder sb = new StringBuilder();
         for(String s:output) sb.append(s).append("\n");
         return sb.toString();
-    }
-
-    private void execute(File file){
-        if(!file.getName().endsWith(".xjln")) throw new RuntimeException("expected .xjln file");
-        if(!file.exists()) throw new RuntimeException("file with path: " + file.getPath() + " does not exist");
-
-
-
-        output.add("\nXJLN Process finished successfully\n");
     }
 
 }

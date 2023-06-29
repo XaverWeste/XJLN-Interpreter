@@ -1,0 +1,15 @@
+def enum = a, b
+
+def classA[] -> init
+
+    var v
+
+    def init()
+
+    end
+
+end
+
+def classB[classA a] => classA
+
+end
