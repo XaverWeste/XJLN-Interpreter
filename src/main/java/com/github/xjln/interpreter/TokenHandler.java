@@ -192,6 +192,14 @@ class TokenHandler {
     }
 
     /**
+     * returns the number of Tokens that the TokenHandler contains
+     * @return number of tokens
+     */
+    public int size(){
+        return tokens.size();
+    }
+
+    /**
      * assert content for a given Token
      * @param token Token who assert content for
      * @param string content to assert

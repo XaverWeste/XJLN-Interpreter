@@ -183,7 +183,7 @@ class Parser {
             currentClass.mem.set(name, m);
         }
 
-        m.add(pl, toAST());
+        m.add(pl, parseAST());
     }
 
     private ParameterList parseParameterList(TokenHandler th){
@@ -200,23 +200,69 @@ class Parser {
         return pl;
     }
 
-    private AST[] toAST(){
+    private AST[] parseAST(){
         ArrayList<AST> ast = new ArrayList<>();
 
-        String line = "";
-        while (!line.equals("end") && sc.hasNextLine()){
+        String line;
+        while (sc.hasNextLine()){
             line = sc.nextLine();
-            if(!line.startsWith("#") && !line.equals("") && !line.equals("end")){
+            if(line.equals("end"))
+                return ast.toArray(new AST[0]);
+
+            if(!line.startsWith("#") && !line.equals("")){
                 if(line.startsWith("if ")){
-
+                    //TODO
                 }else if(line.startsWith("while ")){
-
+                    AST.While w = new AST.While();
+                    TokenHandler th = lexer.getTokens(line);
+                    th.assertToken("while");
+                    w.condition = parseCalc(th);
+                    w.content = parseAST();
+                    ast.add(w);
                 }else{
-                    AST.Calc calc = new AST.Calc();
+
                 }
             }
         }
 
         return ast.toArray(new AST[0]);
+    }
+
+    private AST.Calc parseCalc(TokenHandler th){
+        if(th.size() == 0) throw new RuntimeException("expected argument, got nothing");
+        AST.Calc calc = new AST.Calc();
+
+        if(th.assertToken(Token.Type.IDENTIFIER, Token.Type.OPERATOR, Token.Type.STRING, Token.Type.NUMBER).t() == Token.Type.IDENTIFIER)
+            calc.call = parseNext(th);
+        else
+            calc.content = th.current();
+
+        if(th.hasNext()){
+            AST.Calc current = calc;
+            calc = new AST.Calc();
+            calc.left = current;
+
+            calc.content = th.assertToken(Token.Type.OPERATOR);
+            calc.right = parseCalc(th);
+        }
+
+        return calc;
+    }
+
+    private AST parseNext(TokenHandler th){
+        Token name = th.current();
+        if(th.assertToken(":", "(").equals(":")){
+            AST.RefCall call = new AST.RefCall();
+            call.name = name.s();
+            AST next = parseNext(th);
+
+            if(next instanceof AST.RefCall)
+                call.next = (AST.RefCall) next;
+            else if(next instanceof AST.MethodCall)
+                call.call = (AST.MethodCall) next;
+        }else{
+            //TODO
+        }
+        return null;
     }
 }

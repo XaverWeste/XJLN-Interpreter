@@ -32,6 +32,7 @@ public sealed abstract class AST permits AST.Calc, AST.If, AST.MethodCall, AST.O
     }
 
     final static class While extends AST{
-
+        public Calc condition;
+        public AST[] content;
     }
 }
